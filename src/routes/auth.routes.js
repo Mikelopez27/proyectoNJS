@@ -7,5 +7,4 @@ const router = express.Router();
 router.post("/login", auth.autenticacion)
 router.post("/logout", middleware, auth.logout)
 
-
 module.exports = router;

@@ -6,7 +6,7 @@ exports.up = function (knex) {
     return knex.schema
         .createTable('usuario', function (table) {
             table.specificType('usu_numctrl', 'Int(9) auto_increment primary key');
-            table.integer('emp_clave', 5).references("emp_clave").inTable("empresa");
+            table.integer('emp_clave', 5).references("emp_clave").inTable("empresa").onDelete("CASCADE");
             table.specificType('usu_correo', 'Char (80)');
             table.specificType('usu_nombre', 'Char (80)');
             table.specificType('usu_contra', 'Char (6)');

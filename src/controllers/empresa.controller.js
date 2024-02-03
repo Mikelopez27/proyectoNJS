@@ -49,7 +49,7 @@ exports.agregar = async (req, res) => {
 
 exports.editar = async (req, res) => {
   try {
-    const { emp_clave } = req.params; 
+    const { emp_clave } = req.params;
     const { emp_nomcom, emp_razon, emp_cp, emp_calle, emp_col, emp_cd, emp_conta1, emp_cel1, emp_conta2, emp_cel2, emp_status } = req.body;
 
     const updatedRows = await db('empresa')
@@ -82,7 +82,7 @@ exports.editar = async (req, res) => {
 
 exports.eliminar = async (req, res) => {
   try {
-    const { emp_clave } = req.params; 
+    const { emp_clave } = req.params;
 
     const deletedRows = await db('empresa')
       .where('emp_clave', emp_clave)
@@ -97,4 +97,20 @@ exports.eliminar = async (req, res) => {
     console.error(error);
     res.status(500).json({ msg: 'Error en el servidor' });
   }
+};
+
+exports.select = async (req, res) => {
+  try {
+    const empresaselec = await db('empresa').select('emp_clave', 'emp_nomcom');
+
+    res.send({
+      result: empresaselec
+    });
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
+
 };
