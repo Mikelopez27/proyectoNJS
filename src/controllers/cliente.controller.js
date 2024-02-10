@@ -5,7 +5,11 @@ const db = knex(config);
 
 exports.ver = async (req, res) => {
     try {
-        const cliente = await db('cliente').select('*');
+        const cliente = await db('cliente')
+            .select('cliente.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel', 'cliente.cli_correo', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .join('empresa', 'cliente.emp_clave', '=', 'empresa.emp_clave')
+            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave');
+
 
         res.send({
             result: cliente
@@ -28,7 +32,11 @@ exports.agregar = async (req, res) => {
             cli_correo
         });
 
-        const insertedRow = await db('cliente').where('cli_clave', cli_clave).first();
+        const insertedRow = await db('cliente')
+            .select('cliente.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel', 'cliente.cli_correo', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .join('empresa', 'cliente.emp_clave', '=', 'empresa.emp_clave')
+            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+            .where('cliente.cli_clave', cli_clave).first();
 
         res.send({
             result: insertedRow
@@ -56,7 +64,12 @@ exports.editar = async (req, res) => {
             });
 
         if (updatedRows > 0) {
-            const updatedRow = await db('cliente').where('cli_clave', cli_clave).first();
+            const updatedRow = await db('cliente')
+                .select('cliente.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel', 'cliente.cli_correo', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+                .join('empresa', 'cliente.emp_clave', '=', 'empresa.emp_clave')
+                .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+                .where('cliente.cli_clave', cli_clave).first();
+
             res.json({ result: updatedRow });
         } else {
             res.status(404).json({ msg: 'Cliente no encontrado o no se pudo actualizar' });
@@ -92,6 +105,28 @@ exports.select = async (req, res) => {
 
         res.send({
             result: clienteselec
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
+exports.empcli = async (req, res) => {
+    try {
+        const { empresa } = req.body
+        const clienteBusqueda = await db('cliente')
+            .select('cliente.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel', 'cliente.cli_correo', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .join('empresa', 'cliente.emp_clave', '=', 'empresa.emp_clave')
+            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+            .where('cliente.emp_clave', empresa);
+
+
+        res.send({
+            result: clienteBusqueda
         });
 
 

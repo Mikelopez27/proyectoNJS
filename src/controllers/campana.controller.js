@@ -5,7 +5,10 @@ const db = knex(config);
 
 exports.ver = async (req, res) => {
     try {
-        const campana = await db('campana').select('*');
+        const campana = await db('campana')
+            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', 'campana.cam_lanza', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
+            .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave');
 
         res.send({
             result: campana
@@ -27,7 +30,11 @@ exports.agregar = async (req, res) => {
             cam_desc
         });
 
-        const insertedRow = await db('campana').where('cam_clave', cam_clave).first();
+        const insertedRow = await db('campana')
+            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', 'campana.cam_lanza', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
+            .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave')
+            .where('campana.cam_clave', cam_clave).first();
 
         res.send({
             result: insertedRow
@@ -55,7 +62,12 @@ exports.editar = async (req, res) => {
             });
 
         if (updatedRows > 0) {
-            const updatedRow = await db('campana').where('cam_clave', cam_clave).first();
+            const updatedRow = await db('campana')
+                .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', 'campana.cam_lanza', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+                .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
+                .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave')
+                .where('campana.cam_clave', cam_clave).first();
+
             res.json({ result: updatedRow });
         } else {
             res.status(404).json({ msg: 'Campaña no encontrada o no se pudo actualizar' });
@@ -100,3 +112,26 @@ exports.select = async (req, res) => {
     }
 
 };
+
+exports.empcam = async (req, res) => {
+    try {
+      const {empresa} = req.body
+      const campanaBusqueda = await db('campana')
+      .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', 'campana.cam_lanza', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+      .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
+      .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave') 
+      .where('campana.emp_clave', empresa);
+
+  
+  
+      res.send({
+        result: campanaBusqueda
+      });
+  
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ msg: 'Error en el servidor' });
+    }
+  
+  };

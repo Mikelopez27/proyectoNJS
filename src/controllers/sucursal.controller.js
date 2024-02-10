@@ -5,7 +5,9 @@ const db = knex(config);
 
 exports.ver = async (req, res) => {
     try {
-        const sucursal = await db('sucursal').select('*');
+        const sucursal = await db('sucursal')
+            .select('sucursal.suc_clave', 'sucursal.suc_nom', 'sucursal.suc_tel', 'sucursal.suc_conta', 'sucursal.suc_cel', 'sucursal.suc_calle', 'sucursal.suc_col', 'empresa.emp_nomcom')
+            .join('empresa', 'sucursal.emp_clave', '=', 'empresa.emp_clave');
 
         res.send({
             result: sucursal
@@ -30,7 +32,10 @@ exports.agregar = async (req, res) => {
             suc_col
         });
 
-        const insertedRow = await db('sucursal').where('suc_clave', suc_clave).first();
+        const insertedRow = await db('sucursal')
+            .select('sucursal.suc_clave', 'sucursal.suc_nom', 'sucursal.suc_tel', 'sucursal.suc_conta', 'sucursal.suc_cel', 'sucursal.suc_calle', 'sucursal.suc_col', 'empresa.emp_nomcom')
+            .join('empresa', 'sucursal.emp_clave', '=', 'empresa.emp_clave')
+            .where('sucursal.suc_clave', suc_clave).first();
 
         res.send({
             result: insertedRow
@@ -60,7 +65,11 @@ exports.editar = async (req, res) => {
             });
 
         if (updatedRows > 0) {
-            const updatedRow = await db('sucursal').where('suc_clave', suc_clave).first();
+            const updatedRow = await db('sucursal')
+                .select('sucursal.suc_clave', 'sucursal.suc_nom', 'sucursal.suc_tel', 'sucursal.suc_conta', 'sucursal.suc_cel', 'sucursal.suc_calle', 'sucursal.suc_col', 'empresa.emp_nomcom')
+                .join('empresa', 'sucursal.emp_clave', '=', 'empresa.emp_clave')
+                .where('sucursal.suc_clave', suc_clave).first();
+
             res.json({ result: updatedRow });
         } else {
             res.status(404).json({ msg: 'Sucursal no encontrada o no se pudo actualizar' });
@@ -96,6 +105,26 @@ exports.select = async (req, res) => {
 
         res.send({
             result: sucursalselec
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
+exports.empsuc = async (req, res) => {
+    try {
+        const { empresa } = req.body
+        const sucursalBusqueda = await db('sucursal')
+            .select('sucursal.suc_clave', 'sucursal.suc_nom', 'sucursal.suc_tel', 'sucursal.suc_conta', 'sucursal.suc_cel', 'sucursal.suc_calle', 'sucursal.suc_col', 'empresa.emp_nomcom')
+            .join('empresa', 'sucursal.emp_clave', '=', 'empresa.emp_clave')
+            .where('sucursal.emp_clave', empresa);
+
+        res.send({
+            result: sucursalBusqueda
         });
 
 

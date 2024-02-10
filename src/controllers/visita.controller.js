@@ -4,7 +4,6 @@ const moment = require('moment');
 
 const db = knex(config);
 
-
 exports.ver = async (req, res) => {
     try {
         const visita = await db('visita').select('*');
