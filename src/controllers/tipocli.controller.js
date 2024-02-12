@@ -5,7 +5,9 @@ const db = knex(config);
 
 exports.ver = async (req, res) => {
     try {
-        const tipocli = await db('tipocli').select('*');
+        const tipocli = await db('tipocli')
+            .select('tipocli.tip_clave', 'tipocli.tip_nom', 'tipocli.tip_desc', 'empresa.emp_nomcom')
+            .join('empresa', 'tipocli.emp_clave', '=', 'empresa.emp_clave');
 
         res.send({
             result: tipocli
@@ -18,16 +20,18 @@ exports.ver = async (req, res) => {
 
 exports.agregar = async (req, res) => {
     try {
-        const { tip_clave, emp_clave, tip_nom, tip_desc } = req.body;
+        const { emp_clave, tip_nom, tip_desc } = req.body;
 
-        const [tipclave] = await db('tipocli').insert({
-            tip_clave,
+        const [tip_clave] = await db('tipocli').insert({
             emp_clave,
             tip_nom,
             tip_desc
         });
 
-        const insertedRow = await db('tipocli').where('tip_clave', tip_clave).first();
+        const insertedRow = await db('tipocli')
+            .select('tipocli.tip_clave', 'tipocli.tip_nom', 'tipocli.tip_desc', 'empresa.emp_nomcom')
+            .join('empresa', 'tipocli.emp_clave', '=', 'empresa.emp_clave')
+            .where('tipocli.tip_clave', tip_clave).first();
 
         res.send({
             result: insertedRow
@@ -53,7 +57,10 @@ exports.editar = async (req, res) => {
             });
 
         if (updatedRows > 0) {
-            const updatedRow = await db('tipocli').where('tip_clave', tip_clave).first();
+            const updatedRow = await db('tipocli')
+                .select('tipocli.tip_clave', 'tipocli.tip_nom', 'tipocli.tip_desc', 'empresa.emp_nomcom')
+                .join('empresa', 'tipocli.emp_clave', '=', 'empresa.emp_clave')
+                .where('tipocli.tip_clave', tip_clave).first();
             res.json({ result: updatedRow });
         } else {
             res.status(404).json({ msg: 'Tipo cliente no encontrado o no se pudo actualizar' });
@@ -89,6 +96,26 @@ exports.select = async (req, res) => {
 
         res.send({
             result: tipocliselec
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
+exports.emptipocli = async (req, res) => {
+    try {
+        const { empresa } = req.body
+        const tipoclienteBusqueda = await db('tipocli')
+            .select('tipocli.tip_clave', 'tipocli.tip_nom', 'tipocli.tip_desc', 'empresa.emp_nomcom')
+            .join('empresa', 'tipocli.emp_clave', '=', 'empresa.emp_clave')
+            .where("empresa.emp_clave", empresa);
+
+        res.send({
+            result: tipoclienteBusqueda
         });
 
 

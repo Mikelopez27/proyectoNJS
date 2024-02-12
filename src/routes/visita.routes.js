@@ -7,6 +7,6 @@ const router = express.Router();
 router.get("/verVisita", middleware, visita.ver)
 router.post("/agregarVisita", middleware, visita.agregar)
 router.put("/editarVisita/:visfecha", middleware, visita.editar)
-router.delete("/eliminarVisita/:vis_fecha", visita.eliminar);
+router.delete("/eliminarVisita/:vis_fecha", middleware, visita.eliminar);
 
 module.exports = router;

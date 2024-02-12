@@ -6,7 +6,12 @@ const db = knex(config);
 
 exports.ver = async (req, res) => {
     try {
-        const visita = await db('visita').select('*');
+        const visita = await db('visita')
+            .select('visita.vis_fecha', 'usuario.usu_nombre', 'sucursal.suc_nom', 'cliente.cli_nomcom', 'campana.cam_nom')
+            .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+            .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+            .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+            .join('campana', 'visita.vis_cam', '=', 'campana.cam_clave');
 
         res.send({
             result: visita
@@ -28,7 +33,13 @@ exports.agregar = async (req, res) => {
             vis_cam
         });
 
-        const insertedRow = await db('visita').where('vis_fecha', db.fn.now()).first();
+        const insertedRow = await db('visita')
+            .select('visita.vis_fecha', 'usuario.usu_nombre', 'sucursal.suc_nom', 'cliente.cli_nomcom', 'campana.cam_nom')
+            .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+            .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+            .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+            .join('campana', 'visita.vis_cam', '=', 'campana.cam_clave')
+            .where('visita.vis_fecha', db.fn.now()).first();
 
         res.send({
             result: insertedRow
@@ -43,9 +54,9 @@ exports.agregar = async (req, res) => {
 exports.editar = async (req, res) => {
     try {
         const { visfecha } = req.params;
-        const { usu_numctrl, suc_clave, cli_clave, vis_fecha,vis_cam } = req.body;
+        const { usu_numctrl, suc_clave, cli_clave, vis_fecha, vis_cam } = req.body;
 
-        
+
 
         console.log(visfecha)
         const updatedRows = await db('visita')
@@ -59,7 +70,15 @@ exports.editar = async (req, res) => {
             });
 
         if (updatedRows > 0) {
-            const updatedRow = await db('visita').where('vis_fecha', vis_fecha).first();
+            const updatedRow = await db('visita')
+                .select('visita.vis_fecha', 'usuario.usu_nombre', 'sucursal.suc_nom', 'cliente.cli_nomcom', 'campana.cam_nom')
+                .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+                .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+                .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                .join('campana', 'visita.vis_cam', '=', 'campana.cam_clave')
+                .where('visita.vis_fecha', vis_fecha).first();
+
+
             res.json({ result: updatedRow });
         } else {
             res.status(404).json({ msg: 'Visita no encontrada o no se pudo actualizar' });

@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/verCliente", middleware, cliente.ver)
 router.get("/selectCliente", middleware, cliente.select)
-router.get("/EmpCli", middleware, cliente.empcli)
+router.post("/EmpCli", middleware, cliente.empcli)
 router.post("/agregarCliente", middleware, cliente.agregar)
 router.put("/editarCliente/:cli_clave", middleware, cliente.editar)
 router.delete("/eliminarCliente/:cli_clave", middleware, cliente.eliminar);

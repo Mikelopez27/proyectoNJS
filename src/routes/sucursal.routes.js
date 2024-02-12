@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/verSucursal", middleware, sucursal.ver)
 router.get("/selectSucursal", middleware, sucursal.select)
-router.get("/EmpSuc", middleware, sucursal.empsuc)
+router.post("/EmpSuc", middleware, sucursal.empsuc)
 router.post("/agregarSucursal", middleware, sucursal.agregar)
 router.put("/editarSucursal/:suc_clave", middleware, sucursal.editar)
 router.delete("/eliminarSucursal/:suc_clave", middleware, sucursal.eliminar);
