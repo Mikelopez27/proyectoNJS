@@ -11,6 +11,8 @@ exports.seed = async function (knex) {
   await knex('campana').del()
   await knex('cliente').del()
   await knex('visita').del()
+  await knex('clixcam').del()
+
 
   await knex('empresa').insert([
     {
@@ -152,6 +154,23 @@ exports.seed = async function (knex) {
       cli_clave: 2,
       vis_fecha: '2024-01-19 15:45:00',
       vis_cam: 2
+    }
+
+  ]);
+
+  await knex('clixcam').insert([
+    {
+      emp_clave: 1,
+      cam_clave: 1,
+      cli_clave: 1,
+      cxc_fecha: '2024-01-18'
+    }
+    ,
+    {
+      emp_clave: 2,
+      cam_clave: 2,
+      cli_clave: 2,
+      cxc_fecha: '2024-01-19'
     }
 
   ]);

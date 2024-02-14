@@ -10,7 +10,7 @@ exports.up = function (knex) {
             table.specificType('usu_correo', 'Char (80)');
             table.specificType('usu_nombre', 'Char (80)');
             table.specificType('usu_contra', 'Char (6)');
-            table.boolean("usu_estatus");
+            table.boolean("usu_estatus").defaultTo(true);
             table.integer("usu_tipo", 1);
         });
 };

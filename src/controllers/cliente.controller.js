@@ -6,9 +6,11 @@ const db = knex(config);
 exports.ver = async (req, res) => {
     try {
         const cliente = await db('cliente')
-            .select('cliente.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel', 'cliente.cli_correo', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .select('cliente.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel', 'cliente.cli_correo', 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_nom')
             .join('empresa', 'cliente.emp_clave', '=', 'empresa.emp_clave')
-            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave');
+            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+            .join('clixcam', 'cliente.cli_clave', '=', 'clixcam.cli_clave')
+            .join('campana', 'clixcam.cam_clave', '=', 'campana.cam_clave');
 
 
         res.send({
@@ -22,7 +24,7 @@ exports.ver = async (req, res) => {
 
 exports.agregar = async (req, res) => {
     try {
-        const { emp_clave, tip_clave, cli_nomcom, cli_cel, cli_correo } = req.body;
+        const { emp_clave, tip_clave, cli_nomcom, cli_cel, cli_correo, cam_clave } = req.body;
 
         const [cli_clave] = await db('cliente').insert({
             emp_clave,
@@ -32,10 +34,18 @@ exports.agregar = async (req, res) => {
             cli_correo
         });
 
+        const [cxc_fecha] = await db('clixcam').insert({
+            emp_clave,
+            cam_clave,
+            cli_clave
+        });
+
         const insertedRow = await db('cliente')
-            .select('cliente.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel', 'cliente.cli_correo', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .select('cliente.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel', 'cliente.cli_correo', 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_nom')
             .join('empresa', 'cliente.emp_clave', '=', 'empresa.emp_clave')
             .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+            .join('clixcam', 'cliente.cli_clave', '=', 'clixcam.cli_clave')
+            .join('campana', 'clixcam.cam_clave', '=', 'campana.cam_clave')
             .where('cliente.cli_clave', cli_clave).first();
 
         res.send({
@@ -51,7 +61,7 @@ exports.agregar = async (req, res) => {
 exports.editar = async (req, res) => {
     try {
         const { cli_clave } = req.params;
-        const { emp_clave, tip_clave, cli_nomcom, cli_cel, cli_correo } = req.body;
+        const { emp_clave, tip_clave, cli_nomcom, cli_cel, cli_correo, cam_clave } = req.body;
 
         const updatedRows = await db('cliente')
             .where('cli_clave', cli_clave)
@@ -61,6 +71,16 @@ exports.editar = async (req, res) => {
                 cli_nomcom,
                 cli_cel,
                 cli_correo
+            });
+
+        const updatedRows2 = await db('clixcam')
+            .where('cli_clave', cli_clave)
+            .update({
+                emp_clave,
+                cam_clave,
+                cli_clave,
+                cxc_fecha,
+                cxc_estatus
             });
 
         if (updatedRows > 0) {
@@ -102,6 +122,23 @@ exports.eliminar = async (req, res) => {
 exports.select = async (req, res) => {
     try {
         const clienteselec = await db('cliente').select('cli_clave', 'cli_nomcom');
+
+        res.send({
+            result: clienteselec
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
+exports.selectXemp = async (req, res) => {
+    try {
+        const {empresa} = req.body
+        const clienteselec = await db('cliente').select('cli_clave', 'cli_nomcom').where('emp_clave', empresa);
 
         res.send({
             result: clienteselec

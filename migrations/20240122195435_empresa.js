@@ -17,7 +17,7 @@ exports.up = function (knex) {
             table.integer('emp_cel1', 10);
             table.specificType('emp_conta2', 'Char (50)');
             table.integer('emp_cel2', 10);
-            table.boolean('emp_status');
+            table.boolean('emp_status').defaultTo(true);
         });
 
 };

@@ -106,6 +106,23 @@ exports.select = async (req, res) => {
 
 };
 
+exports.selectXemp = async (req, res) => {
+    try {
+        const {empresa} = req.body
+        const tipocliselec = await db('tipocli').select('tip_clave', 'tip_nom').where('emp_clave', empresa);
+
+        res.send({
+            result: tipocliselec
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
 exports.emptipocli = async (req, res) => {
     try {
         const { empresa } = req.body

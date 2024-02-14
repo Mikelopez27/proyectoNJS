@@ -159,6 +159,23 @@ exports.select = async (req, res) => {
 
 };
 
+exports.selectXemp = async (req, res) => {
+  try {
+    const {empresa} = req.body
+    const usuarioselec = await db('usuario').select('usu_numctrl', 'usu_nombre').where("emp_clave", empresa);
+
+    res.send({
+      result: usuarioselec
+    });
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
+
+};
+
 exports.empusu = async (req, res) => {
   try {
     const {empresa} = req.body

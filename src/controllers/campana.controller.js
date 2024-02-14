@@ -113,6 +113,23 @@ exports.select = async (req, res) => {
 
 };
 
+exports.selectXemp = async (req, res) => {
+    try {
+        const {empresa} = req.body
+        const campanaselec = await db('campana').select('cam_clave', 'cam_nom').where('emp_clave', empresa);
+
+        res.send({
+            result: campanaselec
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
 exports.empcam = async (req, res) => {
     try {
       const {empresa} = req.body

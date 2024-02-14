@@ -115,6 +115,23 @@ exports.select = async (req, res) => {
 
 };
 
+exports.selectXemp = async (req, res) => {
+    try {
+        const { empresa } = req.body
+        const sucursalselec = await db('sucursal').select('suc_clave', 'suc_nom').where("emp_clave", empresa);
+
+        res.send({
+            result: sucursalselec
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
 exports.empsuc = async (req, res) => {
     try {
         const { empresa } = req.body

@@ -21,7 +21,7 @@ exports.autenticacion = async (req, res) => {
             if (blacklist.has(token)) {
                 res.status(401).json({ token: '', status: 500 });
             } else {
-                res.send({ token, status: 200, rol: autenticar.usu_tipo, nombre: autenticar.usu_nombre, empresa: autenticar.emp_clave })
+                res.send({ token, status: 200, rol: autenticar.usu_tipo, clave:autenticar.usu_numctrl ,nombre: autenticar.usu_nombre, empresa: autenticar.emp_clave })
             }
 
         }
