@@ -53,7 +53,7 @@ exports.seed = async function (knex) {
       usu_tipo: 1
     },
     {
-      emp_clave: 1,
+      emp_clave: 2,
       usu_correo: 'usuario2@empresa2.com',
       usu_nombre: 'Usuario 2',
       usu_contra: 'abcdef',
@@ -136,6 +136,20 @@ exports.seed = async function (knex) {
       cli_nomcom: 'Cliente 2',
       cli_cel: 9876543210,
       cli_correo: 'cliente2@example.com'
+    },
+    {
+      emp_clave: 1,
+      tip_clave: 2,
+      cli_nomcom: 'Cliente 3',
+      cli_cel: 3216549870,
+      cli_correo: 'cliente3@example.com'
+    },
+    {
+      emp_clave: 2,
+      tip_clave: 1,
+      cli_nomcom: 'Cliente 4',
+      cli_cel: 9875462301,
+      cli_correo: 'cliente4@example.com'
     }
   ]);
 
@@ -155,6 +169,38 @@ exports.seed = async function (knex) {
       vis_fecha: '2024-01-19 15:45:00',
       vis_cam: 2
     }
+    ,
+    {
+      usu_numctrl: 1,
+      suc_clave: 1,
+      cli_clave: 1,
+      vis_fecha: '2024-01-19 15:45:10',
+      vis_cam: 1
+    }
+    ,
+    {
+      usu_numctrl: 2,
+      suc_clave: 2,
+      cli_clave: 2,
+      vis_fecha: '2024-01-20 15:45:00',
+      vis_cam: 2
+    }
+    ,
+    {
+      usu_numctrl: 1,
+      suc_clave: 1,
+      cli_clave: 3,
+      vis_fecha: '2024-01-20 15:45:10',
+      vis_cam: 1
+    }
+    ,
+    {
+      usu_numctrl: 2,
+      suc_clave: 2,
+      cli_clave: 4,
+      vis_fecha: '2023-12-27 15:45:00',
+      vis_cam: 2
+    }
 
   ]);
 
@@ -171,6 +217,18 @@ exports.seed = async function (knex) {
       cam_clave: 2,
       cli_clave: 2,
       cxc_fecha: '2024-01-19'
+    },
+    {
+      emp_clave: 1,
+      cam_clave: 1,
+      cli_clave: 3,
+      cxc_fecha: '2024-01-17'
+    }
+    ,{
+      emp_clave: 2,
+      cam_clave: 2,
+      cli_clave: 4,
+      cxc_fecha: '2023-12-27'
     }
 
   ]);
