@@ -137,7 +137,7 @@ exports.select = async (req, res) => {
 
 exports.selectXemp = async (req, res) => {
     try {
-        const {empresa} = req.body
+        const { empresa } = req.body
         const clienteselec = await db('cliente').select('cli_clave', 'cli_nomcom').where('emp_clave', empresa);
 
         res.send({
@@ -166,6 +166,25 @@ exports.empcli = async (req, res) => {
             result: clienteBusqueda
         });
 
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
+exports.busqedaxcel = async (req, res) => {
+    try {
+        const { cli_cel } = req.body;
+        const buscel = await db('cliente').select('cli_clave','cli_nomcom').where('cli_cel', cli_cel);
+
+
+        if (buscel.length > 0) {
+            res.json({ result:buscel });
+        } else {
+            res.status(404).json({ msg: 'Cliente no encontrado' });
+        }
 
     } catch (error) {
         console.error(error);

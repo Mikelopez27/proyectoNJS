@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.get("/verCliente", middleware, cliente.ver)
 router.get("/selectCliente", middleware, cliente.select)
+router.post("/busquedaXcel",  cliente.busqedaxcel)
 router.post("/selectXempcli", middleware, cliente.selectXemp)
 router.post("/EmpCli", middleware, cliente.empcli)
 router.post("/agregarCliente", middleware, cliente.agregar)
