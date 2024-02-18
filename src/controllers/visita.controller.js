@@ -141,57 +141,87 @@ exports.insercionmulti = async (req, res) => {
 
 exports.ExpRep = async (req, res) => {
     try {
-        const { empresa, nuevo, inicio, fin } = req.body;
+        const { empresa, tipo, nuevo, inicio, fin } = req.body;
 
         if (nuevo == 0) {
-            const RepoertExpNN = await db('visita')
-                .select('usuario.emp_clave', 'empresa.emp_nomcom', 'visita.vis_fecha', 'visita.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel')
+            let ReportExpNN = db('visita')
+                .select('usuario.emp_clave', 'empresa.emp_nomcom', 'tipocli.tip_clave', 'tipocli.tip_nom', 'visita.vis_fecha', 'visita.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel')
                 .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
                 .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
                 .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
                 .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
                 .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
                 .where('usuario.emp_clave', empresa)
                 .whereBetween('visita.vis_fecha', [inicio, fin]);
 
-            res.status(200).json({ result: RepoertExpNN });
+            if (tipo != 0) {
+                ReportExpNN = ReportExpNN.andWhere('cliente.tip_clave', tipo);
+            }
+
+            const Reporte = await ReportExpNN;
+
+            res.status(200).json({ result: Reporte });
 
         }
         else {
 
-            // const Consulta1 = await db('visita')
-            //     .select('usuario.emp_clave', 'empresa.emp_nomcom', 'visita.vis_fecha', 'visita.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel').count('visita.cli_clave')
-            //     .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
-            //     .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
-            //     .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
-            //     .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
-            //     .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
-            //     .where('usuario.emp_clave', empresa)
-            //     .whereBetween('visita.vis_fecha', [inicio, fin])
-            //     .groupBy('visita.cli_clave', 'usuario.emp_clave');
-
-            const ConsultaR = await db
-                .select('emp_clave','emp_nomcom','vis_fecha','cli_clave','cli_nomcom','cli_cel')
+            let ConsultaR = await db
+                .select('*')
                 .from(function () {
-                    this.select('usuario.emp_clave', 'empresa.emp_nomcom', 'visita.vis_fecha', 'visita.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel').count('visita.cli_clave as contador')
+                    const subquery = this.select('usuario.emp_clave', 'empresa.emp_nomcom', 'tipocli.tip_clave', 'tipocli.tip_nom', 'visita.vis_fecha', 'visita.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel')
                         .from('visita')
                         .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
                         .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
                         .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
                         .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                        .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
                         .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
                         .where('usuario.emp_clave', empresa)
                         .whereBetween('visita.vis_fecha', ['2020-01-01', fin])
                         .groupBy('visita.cli_clave', 'usuario.emp_clave')
-                        .as('subquery');
+                        .havingRaw('COUNT(visita.cli_clave) = 1');
+
+                    if (tipo != 0) {
+                        subquery.andWhere('cliente.tip_clave', tipo); // Aplicar condición según el valor de tipo
+                    }
+
+                    return subquery.as('subquery');
                 })
-                .whereBetween('vis_fecha', [inicio, fin])
-                .where('contador',1)
+                .whereBetween('vis_fecha', [inicio, fin]);
 
+            const Reporte2 = await ConsultaR;
 
-            res.status(200).json({ result: ConsultaR });
+            res.status(200).json({ result: Reporte2 });
+
         }
 
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+};
+
+
+exports.ReporteUsu = async (req, res) => {
+    try {
+        const { empresa, tipo, usuario, nuevo, inicio, fin } = req.body;
+
+        let ReportUsu = db('visita')
+            .select('visita.vis_fecha', 'cliente.cli_nomcom', 'cliente.cli_cel', 'tipocli.tip_nom')
+            .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+            .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+            .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+            .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+            .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+            .where('cliente.emp_clave', empresa)
+            .whereBetween('visita.vis_fecha', [inicio, fin]);
+
+        if(nuevo == 0 )
+            ReportUsu = ReportUsu.andWhere('cliente.tip_clave', tipo) 
+        
 
     } catch (error) {
         console.error(error);
