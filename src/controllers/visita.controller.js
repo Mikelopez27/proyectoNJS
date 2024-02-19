@@ -208,20 +208,28 @@ exports.ReporteUsu = async (req, res) => {
     try {
         const { empresa, tipo, usuario, nuevo, inicio, fin } = req.body;
 
-        let ReportUsu = db('visita')
-            .select('visita.vis_fecha', 'cliente.cli_nomcom', 'cliente.cli_cel', 'tipocli.tip_nom')
-            .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
-            .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
-            .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
-            .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
-            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
-            .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
-            .where('cliente.emp_clave', empresa)
-            .whereBetween('visita.vis_fecha', [inicio, fin]);
 
-        if(nuevo == 0 )
-            ReportUsu = ReportUsu.andWhere('cliente.tip_clave', tipo) 
-        
+        if (nuevo == 0) {
+            let ReportUsu1 = db('visita')
+                .select('visita.vis_fecha', 'cliente.cli_nomcom', 'cliente.cli_cel', 'tipocli.tip_nom')
+                .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+                .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+                .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+                .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+                .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+                .where('cliente.emp_clave', empresa)
+                .whereBetween('visita.vis_fecha', [inicio, fin]);
+
+            if ((usuario == 0) && (tipo == 0)) { }
+            elseif((usuario == 0) && (tipo > 0)); { }
+            elseif((usuario > 0) && (tipo == 0)); { }
+            elseif((usuario > 0) && (tipo > 0)); { }
+
+        }
+        else {
+
+        }
 
     } catch (error) {
         console.error(error);

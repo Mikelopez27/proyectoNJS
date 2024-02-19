@@ -20,10 +20,10 @@ exports.ver = async (req, res) => {
 exports.verImagen = async (req, res) => {
   try {
     const { empresa } = req.body;
-    const imagen = await db('empresa').select('emp_img').where('emp_clave' ,empresa ).first();
+    const imagen = await db('empresa').select('emp_logo').where('emp_clave' ,empresa ).first();
 
     if (imagen) {
-      const imageData = imagen.emp_img;
+      const imageData = imagen.emp_logo;
       res.writeHead(200, {
         'Content-Type': 'image/jpeg',
         'Content-Length': imageData.length
