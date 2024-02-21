@@ -107,7 +107,7 @@ exports.eliminar = async (req, res) => {
 
 exports.insercionmulti = async (req, res) => {
     try {
-        const { emp_clave, tip_clave, cli_nomcom, cli_cel, cli_correo, cam_clave, cxc_estatus, usu_numctrl, suc_clave } = req.body;
+        const { emp_clave, tip_clave, cli_nomcom, cli_cel, cli_correo, cam_clave, usu_numctrl, suc_clave } = req.body;
 
         const [cli_clave] = await db('cliente').insert({
             emp_clave,
@@ -120,7 +120,7 @@ exports.insercionmulti = async (req, res) => {
         const [cxc_fecha] = await db('clixcam').insert({
             emp_clave,
             cam_clave,
-            cli_clave,
+            cli_clave
         });
 
 
@@ -183,7 +183,7 @@ exports.ExpRep = async (req, res) => {
                         .havingRaw('COUNT(visita.cli_clave) = 1');
 
                     if (tipo != 0) {
-                        subquery.andWhere('cliente.tip_clave', tipo); // Aplicar condición según el valor de tipo
+                        subquery.andWhere('cliente.tip_clave', tipo);
                     }
 
                     return subquery.as('subquery');
@@ -221,10 +221,23 @@ exports.ReporteUsu = async (req, res) => {
                 .where('cliente.emp_clave', empresa)
                 .whereBetween('visita.vis_fecha', [inicio, fin]);
 
-            if ((usuario == 0) && (tipo == 0)) { }
-            elseif((usuario == 0) && (tipo > 0)); { }
-            elseif((usuario > 0) && (tipo == 0)); { }
-            elseif((usuario > 0) && (tipo > 0)); { }
+            if ((usuario == 0) && (tipo == 0)) {
+                const reporte1 = await ReportUsu1
+                res.status(200).json({ result: reporte1 });
+            }
+            else if (usuario == 0 && tipo > 0) {
+                const reporte1 = await ReportUsu1;
+
+                const reporte2 = await ReportUsu1.count('visita.usu_numctrl as visitas');
+                
+                res.status(200).json({ result: reporte1, contador: reporte2 });
+            }
+            else if (usuario > 0 && tipo == 0) {
+                // Código para el caso cuando usuario es mayor que cero y tipo es cero
+            }
+            else if (usuario > 0 && tipo > 0) {
+                // Código para el caso cuando usuario y tipo son mayores que cero
+            }
 
         }
         else {

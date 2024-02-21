@@ -9,7 +9,7 @@ exports.up = function(knex) {
         table.integer('emp_clave', 5).references("emp_clave").inTable("empresa").onDelete("CASCADE");
         table.integer('tip_clave', 9).references("tip_clave").inTable("tipocli").onDelete("CASCADE");
         table.specificType('cli_nomcom', 'Char (80)');
-        table.integer('cli_cel', 10);
+        table.specificType('cli_cel', 'Char (10)').unique();
         table.specificType('cli_correo', 'Char (80)');
     });
 };
