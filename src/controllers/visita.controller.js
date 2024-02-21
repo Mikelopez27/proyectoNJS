@@ -221,22 +221,41 @@ exports.ReporteUsu = async (req, res) => {
                 .where('cliente.emp_clave', empresa)
                 .whereBetween('visita.vis_fecha', [inicio, fin]);
 
+            let ReportUsu2 = db('visita')
+                .select('usurio.usu_nombre').count('visita.usu_numctrl as visitas')
+                .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+                .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+                .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+                .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+                .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+                .where('cliente.emp_clave', empresa)
+                .whereBetween('visita.vis_fecha', [inicio, fin]);
+
+
+                // todos - todos
             if ((usuario == 0) && (tipo == 0)) {
                 const reporte1 = await ReportUsu1
-                res.status(200).json({ result: reporte1 });
+                res.status(200).json({ consulta: "1",result: reporte1 });
             }
+            // todos - eleccion
             else if (usuario == 0 && tipo > 0) {
                 const reporte1 = await ReportUsu1;
 
-                const reporte2 = await ReportUsu1.count('visita.usu_numctrl as visitas');
-                
-                res.status(200).json({ result: reporte1, contador: reporte2 });
+                const reporte2 = await ReportUsu1.count('* as total');
+
+                res.status(200).json({ consulta: "2",result: reporte1, contador: reporte2 });
             }
+            // eleccion - todos
             else if (usuario > 0 && tipo == 0) {
-                // Código para el caso cuando usuario es mayor que cero y tipo es cero
+                const reporte1 = await ReportUsu1.andWhere('visita.usu_numctrl',usuario);
+                const reporte2 = await ReportUsu1.count('visita.usu_numctrl as visitas');
+
+                res.status(200).json({ consulta: "3",result: reporte1, contador: reporte2 });
             }
+            // eleccion - eleccion
             else if (usuario > 0 && tipo > 0) {
-                // Código para el caso cuando usuario y tipo son mayores que cero
+                res.status(200).json({ consulta: "4" });
             }
 
         }

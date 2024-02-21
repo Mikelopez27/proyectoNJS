@@ -183,7 +183,7 @@ exports.busqedaxcel = async (req, res) => {
         if (buscel.length > 0) {
             res.json({ result:buscel });
         } else {
-            res.status(404).json({ msg: 'Cliente no encontrado' });
+            res.status(200).json({ result:buscel});
         }
 
     } catch (error) {
