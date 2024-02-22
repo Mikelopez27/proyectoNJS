@@ -237,14 +237,14 @@ exports.ReporteUsu = async (req, res) => {
             // todos - todos = r2
             if ((usuario == 0) && (tipo == 0)) {
                 const reporte1 = await ReportUsu2
-                const reporte2 = await ReportUsu2.count('visita.usu_numctrl as visitas');
+                const reporte2 = reporte1.length;
                 res.status(200).json({ result: reporte1, contador: reporte2 });
             }
             // todos - eleccion r1
             else if (usuario == 0 && tipo > 0) {
                 ReportUsu1 = ReportUsu1.andWhere('tipocli.tip_clave', tipo)
                 const reporte1 = await ReportUsu1;
-                const reporte2 = await ReportUsu1.count('tipocli.tip_clave as total');
+                const reporte2 = reporte1.length;
 
                 res.status(200).json({ result: reporte1, contador: reporte2 });
             }
@@ -252,7 +252,7 @@ exports.ReporteUsu = async (req, res) => {
             else if (usuario > 0 && tipo == 0) {
                 ReportUsu2 = ReportUsu2.andWhere('visita.usu_numctrl', usuario);
                 const reporte1 = await ReportUsu2;
-                const reporte2 = await ReportUsu2.count('visita.usu_numctrl as visitas');
+                const reporte2 = reporte1.length;
 
                 res.status(200).json({ result: reporte1, contador: reporte2 });
             }
@@ -261,7 +261,7 @@ exports.ReporteUsu = async (req, res) => {
 
                 ReportUsu1 = ReportUsu1.andWhere('visita.usu_numctrl', usuario).andWhere('tipocli.tip_clave', tipo);
                 const reporte1 = await ReportUsu1;
-                const reporte2 = await ReportUsu1.count('visita.usu_numctrl as visitas');
+                const reporte2 = reporte1.length;
 
                 res.status(200).json({ result: reporte1, contador: reporte2 });
             }
@@ -288,25 +288,85 @@ exports.ReporteUsu = async (req, res) => {
                     if (usuario == 0 && tipo > 0) {
                         subquery.andWhere('tipocli.tip_clave', tipo);
                     }
-                    // eleccion - todos r2
-                    else if (usuario > 0 && tipo == 0) {
-                        subquery.andWhere('visita.usu_numctrl', usuario);
-                    }
-                    // eleccion - eleccion r1
+                    //  eleccion - eleccion r1
                     else if (usuario > 0 && tipo > 0) {
 
                         subquery.andWhere('visita.usu_numctrl', usuario).andWhere('tipocli.tip_clave', tipo);
                     }
-                    // if (tipo != 0) {
-                    //     subquery.andWhere('cliente.tip_clave', tipo);
-                    // }
 
                     return subquery.as('subquery');
                 })
                 .whereBetween('vis_fecha', [inicio, fin]);
 
-                res.status(200).json({ result: ReportUsu3});
-                
+
+            let ReportUsu4 = await db
+                .select('empleado').sum('visita as visitas')
+                .from(function () {
+                    const subquery = this.select('visita.vis_fecha as fecha', 'usuario.usu_nombre as empleado').count('visita.cli_clave as visita')
+                        .from('visita')
+                        .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+                        .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+                        .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+                        .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                        .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+                        .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+                        .where('usuario.emp_clave', empresa)
+                        .whereBetween('visita.vis_fecha', ['2020-01-01', fin])
+                        .groupBy('visita.cli_clave', 'usuario.usu_numctrl')
+                        .havingRaw('COUNT(visita.cli_clave) = 1');
+
+                    // eleccion - todos r2
+                    if (usuario > 0 && tipo == 0) {
+                        subquery.andWhere('visita.usu_numctrl', usuario)
+                    }
+
+                    return subquery.as('subquery');
+                })
+                .whereBetween('fecha', [inicio, fin]);
+
+            // r3
+            if ((usuario == 0 && tipo > 0) || (usuario > 0 && tipo > 0)) {
+                const report1 = await ReportUsu3
+                const report2 = report1.length
+
+                res.status(200).json({ result: report1, contador: report2 });
+            }
+            // r4
+            else if ((usuario > 0 && tipo == 0) || (usuario == 0 && tipo == 0)) {
+                const report1 = await ReportUsu4
+                // ReportUsu4 = ReportUsu4.select(db.raw('SUM(visitas) as total_visitas'))
+                // const report2 = await ReportUsu4
+                // res.status(200).json({ result: report1, contador: report2 });
+                const totalVisitasConsulta = await db
+                .select(db.raw('SUM(visita) as total_visitas'))
+                .from(function () {
+                    const subquery = this.select('visita.vis_fecha as fecha', 'usuario.usu_nombre as empleado').count('visita.cli_clave as visita')
+                        .from('visita')
+                        .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+                        .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+                        .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+                        .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                        .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+                        .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+                        .where('usuario.emp_clave', empresa)
+                        .whereBetween('visita.vis_fecha', ['2020-01-01', fin])
+                        .groupBy('visita.cli_clave', 'usuario.usu_numctrl')
+                        .havingRaw('COUNT(visita.cli_clave) = 1');
+
+                    // eleccion - todos r2
+                    if (usuario > 0 && tipo == 0) {
+                        subquery.andWhere('visita.usu_numctrl', usuario)
+                    }
+
+                    return subquery.as('subquery');
+                })
+                .groupBy('empleado')
+                .whereBetween('fecha', [inicio, fin])
+                .first();
+
+                res.status(200).json({ result: report1, contador: totalVisitasConsulta.total_visitas });
+            }
+
         }
 
     } catch (error) {
