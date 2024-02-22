@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/verVisita", middleware, visita.ver)
 router.post("/agregarVisita", middleware, visita.agregar)
-router.post("/agregarVCCXC", visita.insercionmulti)
+router.post("/agregarVCCXC", middleware, visita.insercionmulti)
 router.post("/ExportarReporte", middleware, visita.ExpRep)
 router.post("/ReporteUsu", visita.ReporteUsu)
 router.put("/editarVisita/:visfecha", middleware, visita.editar)

@@ -222,7 +222,7 @@ exports.ReporteUsu = async (req, res) => {
                 .whereBetween('visita.vis_fecha', [inicio, fin]);
 
             let ReportUsu2 = db('visita')
-                .select('usurio.usu_nombre').count('visita.usu_numctrl as visitas')
+                .select('usuario.usu_nombre').count('visita.usu_numctrl as visitas')
                 .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
                 .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
                 .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
@@ -230,37 +230,83 @@ exports.ReporteUsu = async (req, res) => {
                 .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
                 .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
                 .where('cliente.emp_clave', empresa)
-                .whereBetween('visita.vis_fecha', [inicio, fin]);
+                .whereBetween('visita.vis_fecha', [inicio, fin])
+                .groupBy('usuario.usu_nombre');
 
 
-                // todos - todos
+            // todos - todos = r2
             if ((usuario == 0) && (tipo == 0)) {
-                const reporte1 = await ReportUsu1
-                res.status(200).json({ consulta: "1",result: reporte1 });
+                const reporte1 = await ReportUsu2
+                const reporte2 = await ReportUsu2.count('visita.usu_numctrl as visitas');
+                res.status(200).json({ result: reporte1, contador: reporte2 });
             }
-            // todos - eleccion
+            // todos - eleccion r1
             else if (usuario == 0 && tipo > 0) {
+                ReportUsu1 = ReportUsu1.andWhere('tipocli.tip_clave', tipo)
                 const reporte1 = await ReportUsu1;
+                const reporte2 = await ReportUsu1.count('tipocli.tip_clave as total');
 
-                const reporte2 = await ReportUsu1.count('* as total');
-
-                res.status(200).json({ consulta: "2",result: reporte1, contador: reporte2 });
+                res.status(200).json({ result: reporte1, contador: reporte2 });
             }
-            // eleccion - todos
+            // eleccion - todos r2
             else if (usuario > 0 && tipo == 0) {
-                const reporte1 = await ReportUsu1.andWhere('visita.usu_numctrl',usuario);
+                ReportUsu2 = ReportUsu2.andWhere('visita.usu_numctrl', usuario);
+                const reporte1 = await ReportUsu2;
+                const reporte2 = await ReportUsu2.count('visita.usu_numctrl as visitas');
+
+                res.status(200).json({ result: reporte1, contador: reporte2 });
+            }
+            // eleccion - eleccion r1
+            else if (usuario > 0 && tipo > 0) {
+
+                ReportUsu1 = ReportUsu1.andWhere('visita.usu_numctrl', usuario).andWhere('tipocli.tip_clave', tipo);
+                const reporte1 = await ReportUsu1;
                 const reporte2 = await ReportUsu1.count('visita.usu_numctrl as visitas');
 
-                res.status(200).json({ consulta: "3",result: reporte1, contador: reporte2 });
-            }
-            // eleccion - eleccion
-            else if (usuario > 0 && tipo > 0) {
-                res.status(200).json({ consulta: "4" });
+                res.status(200).json({ result: reporte1, contador: reporte2 });
             }
 
         }
         else {
+            let ReportUsu3 = await db
+                .select('*')
+                .from(function () {
+                    const subquery = this.select('visita.vis_fecha', 'cliente.cli_nomcom', 'cliente.cli_cel', 'tipocli.tip_nom')
+                        .from('visita')
+                        .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+                        .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+                        .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+                        .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                        .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+                        .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+                        .where('usuario.emp_clave', empresa)
+                        .whereBetween('visita.vis_fecha', ['2020-01-01', fin])
+                        .groupBy('visita.cli_clave', 'usuario.emp_clave')
+                        .havingRaw('COUNT(visita.cli_clave) = 1');
 
+                    // todos - eleccion r1
+                    if (usuario == 0 && tipo > 0) {
+                        subquery.andWhere('tipocli.tip_clave', tipo);
+                    }
+                    // eleccion - todos r2
+                    else if (usuario > 0 && tipo == 0) {
+                        subquery.andWhere('visita.usu_numctrl', usuario);
+                    }
+                    // eleccion - eleccion r1
+                    else if (usuario > 0 && tipo > 0) {
+
+                        subquery.andWhere('visita.usu_numctrl', usuario).andWhere('tipocli.tip_clave', tipo);
+                    }
+                    // if (tipo != 0) {
+                    //     subquery.andWhere('cliente.tip_clave', tipo);
+                    // }
+
+                    return subquery.as('subquery');
+                })
+                .whereBetween('vis_fecha', [inicio, fin]);
+
+                res.status(200).json({ result: ReportUsu3});
+                
         }
 
     } catch (error) {

@@ -21,9 +21,11 @@ exports.autenticacion = async (req, res) => {
             if (blacklist.has(token)) {
                 res.status(401).json({ token: '', status: 500 });
             } else {
-                res.send({ token, status: 200, rol: autenticar.usu_tipo, clave:autenticar.usu_numctrl ,nombre: autenticar.usu_nombre, empresa: autenticar.emp_clave })
-            }
+                const nombreEmpresa = await db('empresa').select('emp_nomcom').where('emp_clave', autenticar.emp_clave).first()
 
+                res.send({ token, status: 200, rol: autenticar.usu_tipo, clave:autenticar.usu_numctrl ,nombre: autenticar.usu_nombre, empresa: autenticar.emp_clave, nomemp:nombreEmpresa.emp_nomcom })
+            }
+            
         }
         else {
             res.send({ token: "", status: 403 });
