@@ -237,7 +237,7 @@ exports.ReporteUsu = async (req, res) => {
             // todos - todos = r2
             if ((usuario == 0) && (tipo == 0)) {
                 const reporte1 = await ReportUsu2
-                const reporte2 = reporte1.length;
+                const reporte2 = reporte1.reduce((total, item) => total + item.visitas, 0);
                 res.status(200).json({ result: reporte1, contador: reporte2 });
             }
             // todos - eleccion r1
@@ -333,12 +333,13 @@ exports.ReporteUsu = async (req, res) => {
             }
             // r4
             else if ((usuario > 0 && tipo == 0) || (usuario == 0 && tipo == 0)) {
+            
                 const report1 = await ReportUsu4
                 // ReportUsu4 = ReportUsu4.select(db.raw('SUM(visitas) as total_visitas'))
                 // const report2 = await ReportUsu4
                 // res.status(200).json({ result: report1, contador: report2 });
                 const totalVisitasConsulta = await db
-                .select(db.raw('SUM(visita) as total_visitas'))
+                .sum('visita as visitas')
                 .from(function () {
                     const subquery = this.select('visita.vis_fecha as fecha', 'usuario.usu_nombre as empleado').count('visita.cli_clave as visita')
                         .from('visita')
@@ -364,7 +365,7 @@ exports.ReporteUsu = async (req, res) => {
                 .whereBetween('fecha', [inicio, fin])
                 .first();
 
-                res.status(200).json({ result: report1, contador: totalVisitasConsulta.total_visitas });
+                res.status(200).json({ result: report1, contador: totalVisitasConsulta.visitas });
             }
 
         }
