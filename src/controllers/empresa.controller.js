@@ -40,11 +40,11 @@ exports.verImagen = async (req, res) => {
 
 exports.agregar = async (req, res) => {
   try {
-    const { emp_nomcom, emp_img, emp_razon, emp_cp, emp_calle, emp_col, emp_cd, emp_conta1, emp_cel1, emp_conta2, emp_cel2, emp_status } = req.body;
+    const { emp_nomcom, emp_logo, emp_razon, emp_cp, emp_calle, emp_col, emp_cd, emp_conta1, emp_cel1, emp_conta2, emp_cel2, emp_status } = req.body;
 
     const [emp_clave] = await db('empresa').insert({
       emp_nomcom,
-      emp_img,
+      emp_logo,
       emp_razon,
       emp_cp,
       emp_calle,
@@ -72,13 +72,13 @@ exports.agregar = async (req, res) => {
 exports.editar = async (req, res) => {
   try {
     const { emp_clave } = req.params;
-    const { emp_nomcom, emp_img, emp_razon, emp_cp, emp_calle, emp_col, emp_cd, emp_conta1, emp_cel1, emp_conta2, emp_cel2, emp_status } = req.body;
+    const { emp_nomcom, emp_logo, emp_razon, emp_cp, emp_calle, emp_col, emp_cd, emp_conta1, emp_cel1, emp_conta2, emp_cel2, emp_status } = req.body;
 
     const updatedRows = await db('empresa')
       .where('emp_clave', emp_clave)
       .update({
         emp_nomcom,
-        emp_img,
+        emp_logo,
         emp_razon,
         emp_cp,
         emp_calle,
