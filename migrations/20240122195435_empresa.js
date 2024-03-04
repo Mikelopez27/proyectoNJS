@@ -7,7 +7,7 @@ exports.up = function (knex) {
     return knex.schema
         .createTable('empresa', function (table) {
             table.specificType('emp_clave', 'Int(5) auto_increment primary key');
-            table.specificType('emp_logo','LONGBLOB')
+            table.specificType('emp_logo','LONGBLOB');
             table.specificType('emp_nomcom', 'Char (80)');
             table.specificType('emp_razon', 'Char (80)');
             table.integer('emp_cp', 5);

@@ -10,7 +10,10 @@ exports.up = function(knex) {
         table.integer('tip_clave', 9).references("tip_clave").inTable("tipocli");
         table.specificType('cam_nom', 'Char (80)');
         table.text('cam_desc');
-        table.date('cam_lanza').defaultTo(knex.fn.now());
+        table.date('cam_lanza');
+        table.text('cam_mensaje');
+        table.specificType('cam_imagen','LONGBLOB');
+        table.date('cam_crea').defaultTo(knex.fn.now());
 
     });
 };
