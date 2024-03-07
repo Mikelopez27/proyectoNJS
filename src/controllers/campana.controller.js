@@ -86,7 +86,7 @@ exports.editar = async (req, res) => {
         }
 
         const { cam_clave } = req.params;
-        
+
         const { emp_clave, tip_clave, cam_nom, cam_desc, cam_lanza, cam_mensaje, cam_crea } = req.body;
 
         const updatedRows = await db('campana')
@@ -186,6 +186,36 @@ exports.empcam = async (req, res) => {
             result: campanaBusqueda
         });
 
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
+exports.anacamp = async (req, res) => {
+    try {
+        const { empresa, campana, inicio, fin } = req.body;
+
+        let AnalisisCamp = db('visita')
+            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_lanza')
+            .count('campana.cam_clave as respuesta')
+            .join('campana', 'campana.cam_clave', '=', 'visita.vis_cam')
+            .join('sucursal', 'sucursal.suc_clave', '=', 'visita.suc_clave')
+            .where('sucursal.emp_clave', empresa)
+            .whereBetween('campana.cam_lanza', [inicio, fin])
+            
+
+        if (campana != 0) {
+            AnalisisCamp = AnalisisCamp.andWhere('visita.vis_cam', campana);
+        }
+
+        AnalisisCamp = AnalisisCamp.groupBy('campana.cam_clave');
+
+        const Consulta = await AnalisisCamp;
+
+        res.status(200).json({ result: Consulta });
 
     } catch (error) {
         console.error(error);

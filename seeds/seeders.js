@@ -109,14 +109,16 @@ exports.seed = async function (knex) {
       EMP_CLAVE: 1,
       TIP_CLAVE: 1,
       CAM_NOM: "Campaña 1",
-      CAM_DESC: "Descripción de la Campaña 1"
+      CAM_DESC: "Descripción de la Campaña 1",
+      CAM_LANZA: "2024-01-20"
     }
     ,
     {
       EMP_CLAVE: 2,
       TIP_CLAVE: 2,
       CAM_NOM: "Campaña 2",
-      CAM_DESC: "Descripción de la Campaña 2"
+      CAM_DESC: "Descripción de la Campaña 2",
+      CAM_LANZA: "2024-01-23"
     }
 
   ]);

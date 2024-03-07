@@ -192,3 +192,22 @@ exports.busqedaxcel = async (req, res) => {
     }
 
 };
+
+exports.conttipocli = async (req, res) => {
+    try {
+        const { empresa, tipocli } = req.body
+        const contadortipocliente = await db('cliente')
+            .count('emp_clave as contador')
+            .where('emp_clave', empresa)
+            .andWhere('tip_clave', tipocli);
+
+        res.send({
+            result: contadortipocliente
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
