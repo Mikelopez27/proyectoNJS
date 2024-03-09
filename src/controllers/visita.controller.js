@@ -1,6 +1,7 @@
 const knex = require('knex');
 const config = require('../../knexfile');
 const moment = require('moment');
+const { json } = require('express');
 
 const db = knex(config);
 
@@ -333,37 +334,37 @@ exports.ReporteUsu = async (req, res) => {
             }
             // r4
             else if ((usuario > 0 && tipo == 0) || (usuario == 0 && tipo == 0)) {
-            
+
                 const report1 = await ReportUsu4
                 // ReportUsu4 = ReportUsu4.select(db.raw('SUM(visitas) as total_visitas'))
                 // const report2 = await ReportUsu4
                 // res.status(200).json({ result: report1, contador: report2 });
                 const totalVisitasConsulta = await db
-                .sum('visita as visitas')
-                .from(function () {
-                    const subquery = this.select('visita.vis_fecha as fecha', 'usuario.usu_nombre as empleado').count('visita.cli_clave as visita')
-                        .from('visita')
-                        .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
-                        .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
-                        .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
-                        .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
-                        .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
-                        .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
-                        .where('usuario.emp_clave', empresa)
-                        .whereBetween('visita.vis_fecha', ['2020-01-01', fin])
-                        .groupBy('visita.cli_clave', 'usuario.usu_numctrl')
-                        .havingRaw('COUNT(visita.cli_clave) = 1');
+                    .sum('visita as visitas')
+                    .from(function () {
+                        const subquery = this.select('visita.vis_fecha as fecha', 'usuario.usu_nombre as empleado').count('visita.cli_clave as visita')
+                            .from('visita')
+                            .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+                            .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+                            .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+                            .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+                            .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+                            .where('usuario.emp_clave', empresa)
+                            .whereBetween('visita.vis_fecha', ['2020-01-01', fin])
+                            .groupBy('visita.cli_clave', 'usuario.usu_numctrl')
+                            .havingRaw('COUNT(visita.cli_clave) = 1');
 
-                    // eleccion - todos r2
-                    if (usuario > 0 && tipo == 0) {
-                        subquery.andWhere('visita.usu_numctrl', usuario)
-                    }
+                        // eleccion - todos r2
+                        if (usuario > 0 && tipo == 0) {
+                            subquery.andWhere('visita.usu_numctrl', usuario)
+                        }
 
-                    return subquery.as('subquery');
-                })
-                .groupBy('empleado')
-                .whereBetween('fecha', [inicio, fin])
-                .first();
+                        return subquery.as('subquery');
+                    })
+                    .groupBy('empleado')
+                    .whereBetween('fecha', [inicio, fin])
+                    .first();
 
                 res.status(200).json({ result: report1, contador: totalVisitasConsulta.visitas });
             }
@@ -371,6 +372,55 @@ exports.ReporteUsu = async (req, res) => {
         }
 
     } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+};
+
+exports.GrafVis = async (req, res) => {
+    try {
+        const { empresa, inicio, fin } = req.body;
+
+
+        const ConsultaRec = await db('visita')
+            .select(db.raw('DATE(visita.vis_fecha) as fecha'))
+            .count('* as total_visitas')
+            .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+            .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+            .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+            .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+            .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+            .where('usuario.emp_clave', empresa)
+            .whereBetween('visita.vis_fecha', [inicio, fin])
+            .groupBy('fecha')
+            .having(db.raw('total_visitas <> 1'));
+
+
+        let ConsultaNue = await db
+            .select('*')
+            .from(function () {
+                const subquery = this.select('usuario.emp_clave', 'empresa.emp_nomcom', 'tipocli.tip_clave', 'tipocli.tip_nom', 'visita.vis_fecha', 'visita.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel')
+                    .from('visita')
+                    .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+                    .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+                    .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+                    .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+                    .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
+                    .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
+                    .where('usuario.emp_clave', empresa)
+                    .whereBetween('visita.vis_fecha', ['2020-01-01', fin])
+                    .groupBy('visita.cli_clave', 'usuario.emp_clave')
+                    .havingRaw('COUNT(visita.cli_clave) = 1');
+
+                return subquery.as('subquery');
+            })
+            .whereBetween('vis_fecha', [inicio, fin]);
+
+        res.status(200).json({ result: ConsultaRec });
+
+    }
+    catch (error) {
         console.error(error);
         res.status(500).json({ msg: 'Error en el servidor' });
     }

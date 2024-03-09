@@ -1,7 +1,10 @@
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> } 
+ * 
  */
+const fs = require('fs');
+const path = require('path');
 exports.seed = async function (knex) {
   // Deletes ALL existing entries
   await knex('empresa').del()
@@ -13,9 +16,10 @@ exports.seed = async function (knex) {
   await knex('visita').del()
   await knex('clixcam').del()
 
-
+  let data = fs.readFileSync(path.join(__dirname, '../images/' + 'company.png'));
   await knex('empresa').insert([
     {
+      emp_logo: data,
       emp_nomcom: 'Empresa 1',
       emp_razon: 'Razón Social 1',
       emp_cp: 12345,
@@ -29,6 +33,7 @@ exports.seed = async function (knex) {
       emp_status: true
     },
     {
+      emp_logo: data,
       emp_nomcom: 'Empresa 2',
       emp_razon: 'Razón Social 2',
       emp_cp: 54321,
@@ -226,7 +231,7 @@ exports.seed = async function (knex) {
       cli_clave: 3,
       cxc_fecha: '2024-01-17'
     }
-    ,{
+    , {
       emp_clave: 2,
       cam_clave: 2,
       cli_clave: 4,
