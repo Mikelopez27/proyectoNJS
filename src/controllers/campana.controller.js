@@ -21,6 +21,24 @@ exports.ver = async (req, res) => {
     }
 };
 
+exports.verImagen = async (req, res) => {
+    try {
+        const { campana } = req.body;
+        const imagen = await db('campana').select('cam_imagen').where('cam_clave', campana).first();
+
+        const imageData = imagen.cam_imagen;
+        res.writeHead(200, {
+            'Content-Type': 'image/jpeg',
+            'Content-Length': imageData.length
+        });
+        res.end(imageData);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error de Servidor' });
+    }
+};
+
 exports.agregar = async (req, res) => {
     try {
         let data;
@@ -74,12 +92,8 @@ exports.agregar = async (req, res) => {
 exports.editar = async (req, res) => {
     try {
 
-        let data;
-
-        if (req.file == null) {
-            data = fs.readFileSync(path.join(__dirname, '../../images/' + 'company.png'));
-        }
-        else {
+        if (req.file) {
+            let data;
             const type = req.file.mimetype;
             const name = req.file.originalname;
             data = fs.readFileSync(path.join(__dirname, '../../images/' + req.file.filename));
@@ -87,20 +101,37 @@ exports.editar = async (req, res) => {
 
         const { cam_clave } = req.params;
 
-        const { emp_clave, tip_clave, cam_nom, cam_desc, cam_lanza, cam_mensaje, cam_crea } = req.body;
+        const { emp_clave, tip_clave, cam_nom, cam_desc, cam_lanza, cam_mensaje, cam_crea, cam_estatus } = req.body;
 
-        const updatedRows = await db('campana')
-            .where('cam_clave', cam_clave)
-            .update({
-                emp_clave,
-                tip_clave,
-                cam_nom,
-                cam_desc,
-                cam_lanza,
-                cam_mensaje,
-                cam_imagen: data,
-                cam_crea
-            });
+        let updatedRows
+        if (req.file == null) {
+            updatedRows = await db('campana')
+                .where('cam_clave', cam_clave)
+                .update({
+                    emp_clave,
+                    tip_clave,
+                    cam_nom,
+                    cam_desc,
+                    cam_lanza,
+                    cam_crea,
+                    cam_estatus
+                });
+        }
+        else {
+            updatedRows = await db('campana')
+                .where('cam_clave', cam_clave)
+                .update({
+                    emp_clave,
+                    tip_clave,
+                    cam_nom,
+                    cam_desc,
+                    cam_lanza,
+                    cam_mensaje,
+                    cam_imagen: data,
+                    cam_crea,
+                    cam_estatus
+                });
+        }
 
         if (updatedRows > 0) {
             const updatedRow = await db('campana')
@@ -205,7 +236,7 @@ exports.anacamp = async (req, res) => {
             .join('sucursal', 'sucursal.suc_clave', '=', 'visita.suc_clave')
             .where('sucursal.emp_clave', empresa)
             .whereBetween('campana.cam_lanza', [inicio, fin])
-            
+
 
         if (campana != 0) {
             AnalisisCamp = AnalisisCamp.andWhere('visita.vis_cam', campana);

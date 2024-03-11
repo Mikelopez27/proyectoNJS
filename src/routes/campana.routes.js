@@ -20,9 +20,10 @@ router.get("/verCampana", middleware, campana.ver)
 router.get("/selectCampana", middleware, campana.select)
 router.post("/selectXempcam", middleware, campana.selectXemp)
 router.post("/EmpCam", middleware, campana.empcam)
+router.post("/traerImgCam", middleware, campana.verImagen)
 router.post("/AnalisisCamp", middleware, campana.anacamp)
 router.post("/agregarCampana", fileUpload, campana.agregar)
-router.put("/editarCampana/:cam_clave", middleware, campana.editar)
+router.put("/editarCampana/:cam_clave", fileUpload, middleware, campana.editar)
 router.delete("/eliminarCampana/:cam_clave", middleware, campana.eliminar);
 
 module.exports = router;

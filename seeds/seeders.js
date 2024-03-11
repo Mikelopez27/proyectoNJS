@@ -115,7 +115,8 @@ exports.seed = async function (knex) {
       TIP_CLAVE: 1,
       CAM_NOM: "Campaña 1",
       CAM_DESC: "Descripción de la Campaña 1",
-      CAM_LANZA: "2024-01-20"
+      CAM_LANZA: "2024-01-20",
+      cam_imagen: data
     }
     ,
     {
@@ -123,7 +124,8 @@ exports.seed = async function (knex) {
       TIP_CLAVE: 2,
       CAM_NOM: "Campaña 2",
       CAM_DESC: "Descripción de la Campaña 2",
-      CAM_LANZA: "2024-01-23"
+      CAM_LANZA: "2024-01-23",
+      cam_imagen: data
     }
 
   ]);

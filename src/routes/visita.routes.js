@@ -9,7 +9,7 @@ router.post("/agregarVisita", middleware, visita.agregar)
 router.post("/agregarVCCXC", middleware, visita.insercionmulti)
 router.post("/ExportarReporte", middleware, visita.ExpRep)
 router.post("/ReporteUsu", middleware, visita.ReporteUsu)
-router.post("/GraficaVis", visita.GrafVis)
+router.post("/GraficaVis", middleware, visita.GrafVis)
 router.put("/editarVisita/:visfecha", middleware, visita.editar)
 router.delete("/eliminarVisita/:vis_fecha", middleware, visita.eliminar)
 

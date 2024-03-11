@@ -379,45 +379,101 @@ exports.ReporteUsu = async (req, res) => {
 
 exports.GrafVis = async (req, res) => {
     try {
-        const { empresa, inicio, fin } = req.body;
+        const { empresa, select, inicio, fin } = req.body;
 
+        // Crear un array de todos los días entre inicio y fin
+        const dias = [];
+        let fechaActual = moment(inicio, 'YYYY-MM-DD');
+        const fechaFin = moment(fin, 'YYYY-MM-DD');
+        while (fechaActual.isSameOrBefore(fechaFin, 'day')) {
+            dias.push(fechaActual.format('YYYY-MM-DD'));
+            fechaActual.add(1, 'day');
+        }
 
-        const ConsultaRec = await db('visita')
-            .select(db.raw('DATE(visita.vis_fecha) as fecha'))
-            .count('* as total_visitas')
-            .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
-            .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
-            .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
-            .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
-            .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
-            .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
-            .where('usuario.emp_clave', empresa)
-            .whereBetween('visita.vis_fecha', [inicio, fin])
-            .groupBy('fecha')
-            .having(db.raw('total_visitas <> 1'));
-
-
-        let ConsultaNue = await db
-            .select('*')
+        const ConsultaRec = await db
+            .select(db.raw('DATE(vi.vis_fecha) as Fecha'))
+            .count('vi.vis_fecha as total')
             .from(function () {
-                const subquery = this.select('usuario.emp_clave', 'empresa.emp_nomcom', 'tipocli.tip_clave', 'tipocli.tip_nom', 'visita.vis_fecha', 'visita.cli_clave', 'cliente.cli_nomcom', 'cliente.cli_cel')
-                    .from('visita')
-                    .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
-                    .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
-                    .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
-                    .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
-                    .join('tipocli', 'cliente.tip_clave', '=', 'tipocli.tip_clave')
-                    .join('campana', 'visita.suc_clave', '=', 'campana.cam_clave')
-                    .where('usuario.emp_clave', empresa)
-                    .whereBetween('visita.vis_fecha', ['2020-01-01', fin])
-                    .groupBy('visita.cli_clave', 'usuario.emp_clave')
-                    .havingRaw('COUNT(visita.cli_clave) = 1');
-
-                return subquery.as('subquery');
+                this.select('vi.cli_clave as Cliente')
+                    .count('vi.cli_clave as visitas')
+                    .from('visita as vi')
+                    .innerJoin('usuario as us', 'vi.usu_numctrl', 'us.usu_numctrl')
+                    .where('us.emp_clave', empresa)
+                    .whereBetween('vi.vis_fecha', ['2023-12-01', fin])
+                    .groupBy('vi.cli_clave')
+                    .having('visitas', '!=', 1)
+                    .as('q1');
             })
-            .whereBetween('vis_fecha', [inicio, fin]);
+            .innerJoin('visita as vi', 'vi.cli_clave', 'q1.Cliente')
+            .whereBetween('vi.vis_fecha', [inicio, fin])
+            .groupBy('Fecha');
 
-        res.status(200).json({ result: ConsultaRec });
+        const ConsultaNue = await db
+            .select(db.raw('DATE(vi.vis_fecha) as Fecha'))
+            .count('vi.vis_fecha as total')
+            .from(function () {
+                this.select('vi.cli_clave as Cliente')
+                    .count('vi.cli_clave as visitas')
+                    .from('visita as vi')
+                    .innerJoin('usuario as us', 'vi.usu_numctrl', 'us.usu_numctrl')
+                    .where('us.emp_clave', empresa)
+                    .whereBetween('vi.vis_fecha', ['2023-12-01', fin])
+                    .groupBy('vi.cli_clave')
+                    .having('visitas', '=', 1)
+                    .as('q1');
+            })
+            .innerJoin('visita as vi', 'vi.cli_clave', 'q1.Cliente')
+            .whereBetween('vi.vis_fecha', [inicio, fin])
+            .groupBy('Fecha');
+
+
+        const resultados = {};
+        ConsultaRec.forEach((fila) => {
+            const fecha = moment(fila.Fecha).format('YYYY-MM-DD');
+            resultados[fecha] = fila.total;
+        });
+
+        const resultados2 = {};
+        ConsultaNue.forEach((fila) => {
+            const fecha = moment(fila.Fecha).format('YYYY-MM-DD');
+            resultados[fecha] = fila.total;
+        });
+
+        if (select == 1) {
+            const resultadosOrdenados = dias.map((dia) => ({
+                Fecha: dia,
+                total: resultados[dia] || 0
+            }));
+            const resultadosOrdenados2 = dias.map((dia) => ({
+                Fecha: dia,
+                total: resultados2[dia] || 0
+            }));
+            res.status(200).json({ result: resultadosOrdenados,result2: resultadosOrdenados2 });
+        }
+        else {
+            const resultadosAgrupados = [];
+            for (let i = 0; i < dias.length; i += select) {
+                const fechaInicio = dias[i];
+                const fechaFinIntervalo = moment(dias[i + (select - 1)] || fin).format('YYYY-MM-DD');
+                let totalIntervalo = 0;
+                for (let fecha = fechaInicio; fecha <= fechaFinIntervalo; fecha = moment(fecha).add(1, 'day').format('YYYY-MM-DD')) {
+                    totalIntervalo += resultados[fecha] || 0;
+                }
+                resultadosAgrupados.push({ Fecha: `${fechaFinIntervalo}`, total: totalIntervalo });
+            }
+            const resultadosAgrupados2 = [];
+            for (let i = 0; i < dias.length; i += select) {
+                const fechaInicio = dias[i];
+                const fechaFinIntervalo = moment(dias[i + (select - 1)] || fin).format('YYYY-MM-DD');
+                let totalIntervalo = 0;
+                for (let fecha = fechaInicio; fecha <= fechaFinIntervalo; fecha = moment(fecha).add(1, 'day').format('YYYY-MM-DD')) {
+                    totalIntervalo += resultados2[fecha] || 0;
+                }
+                resultadosAgrupados2.push({ Fecha: `${fechaFinIntervalo}`, total: totalIntervalo });
+            }
+
+            res.status(200).json({ result: resultadosAgrupados, result2: resultadosAgrupados2 });
+        }
 
     }
     catch (error) {
