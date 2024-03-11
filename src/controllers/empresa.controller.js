@@ -70,7 +70,7 @@ exports.agregar = async (req, res) => {
       emp_cel2,
       emp_status
     });
-    
+
     if (req.file) {
       fs.unlinkSync(path.join(__dirname, '../../images/' + req.file.filename));
     }
@@ -108,7 +108,7 @@ exports.editar = async (req, res) => {
       .where('emp_clave', emp_clave)
       .update({
         emp_nomcom,
-        emp_logo:data,
+        emp_logo: data,
         emp_razon,
         emp_cp,
         emp_calle,
@@ -158,6 +158,47 @@ exports.select = async (req, res) => {
 
     res.send({
       result: empresaselec
+    });
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
+
+};
+
+exports.empresaUs = async (req, res) => {
+  try {
+
+    const { empresa } = req.body;
+
+    const DatosEmp = await db('empresa').select('*').where('emp_clave', empresa);
+    res.send({
+      result: DatosEmp
+    });
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
+
+};
+
+exports.DatosCVCS = async (req, res) => {
+  try {
+
+    const { empresa } = req.body;
+
+    const CountCli = await db('cliente').count('cli_clave as contador').where('emp_clave',empresa).first();
+    const CountVis = await db('visita').count('usuario.emp_clave as contador')
+    .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+    .where('usuario.emp_clave', empresa).first();
+    const CountCam = await db('campana').count('emp_clave as contador').where('emp_clave', empresa).first();
+    const CountSuc = await db('sucursal').count('emp_clave as contador').where('emp_clave', empresa).first();
+    res.send({
+      Clientes: CountCli.contador, Visitas:CountVis.contador, Campaña:CountCam.contador, Sucursal:CountSuc.contador
     });
 
 

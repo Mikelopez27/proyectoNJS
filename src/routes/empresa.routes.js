@@ -19,6 +19,8 @@ const fileUpload = multer({
 router.get("/verEmpresa", middleware, empresa.ver)
 router.get("/selectEmpresa", middleware, empresa.select)
 router.post("/traerImg", middleware, empresa.verImagen)
+router.post("/Empresa", middleware, empresa.empresaUs)
+router.post("/CVCS", middleware, empresa.DatosCVCS)
 router.post("/agregarEmpresa", fileUpload, middleware, empresa.agregar)
 router.put("/editarEmpresa/:emp_clave", fileUpload, middleware, empresa.editar)
 router.delete("/eliminarEmpresa/:emp_clave", middleware, empresa.eliminar);
