@@ -17,7 +17,7 @@ exports.autenticacion = async (req, res) => {
 
         if (autenticar) {
             const token = jwt.sign({ correo }, "Stack", {
-                expiresIn: '60m'
+                expiresIn: '480m'
             });
             if (blacklist.has(token)) {
                 res.status(401).json({ token: '', status: 500 });

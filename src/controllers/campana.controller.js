@@ -206,7 +206,7 @@ exports.empcam = async (req, res) => {
     try {
         const { empresa } = req.body
         const campanaBusqueda = await db('campana')
-            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', 'campana.cam_lanza', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom')
             .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
             .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave')
             .where('campana.emp_clave', empresa);
