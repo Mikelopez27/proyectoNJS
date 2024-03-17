@@ -19,7 +19,7 @@ const fileUpload = multer({
 router.get("/verCampana", middleware, campana.ver)
 router.get("/selectCampana", middleware, campana.select)
 router.post("/selectXempcam", middleware, campana.selectXemp)
-router.post("/EmpCam", campana.empcam)
+router.post("/EmpCam", middleware, campana.empcam)
 router.post("/traerImgCam", middleware, campana.verImagen)
 router.post("/AnalisisCamp", middleware, campana.anacamp)
 router.post("/agregarCampana", fileUpload, campana.agregar)
