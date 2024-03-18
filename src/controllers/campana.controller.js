@@ -91,9 +91,8 @@ exports.agregar = async (req, res) => {
 
 exports.editar = async (req, res) => {
     try {
-
+        let data;
         if (req.file) {
-            let data;
             const type = req.file.mimetype;
             const name = req.file.originalname;
             data = fs.readFileSync(path.join(__dirname, '../../images/' + req.file.filename));
@@ -206,7 +205,7 @@ exports.empcam = async (req, res) => {
     try {
         const { empresa } = req.body
         const campanaBusqueda = await db('campana')
-            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_mensaje', 'campana.cam_crea','campana.cam_estatus')
+            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_mensaje', 'campana.cam_crea', 'campana.cam_estatus')
             .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
             .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave')
             .where('campana.emp_clave', empresa);
