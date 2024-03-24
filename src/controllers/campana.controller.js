@@ -8,7 +8,7 @@ const db = knex(config);
 exports.ver = async (req, res) => {
     try {
         const campana = await db('campana')
-            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', 'campana.cam_lanza', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_mensaje')
             .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
             .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave');
 
@@ -71,7 +71,7 @@ exports.agregar = async (req, res) => {
         }
 
         const insertedRow = await db('campana')
-            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', 'campana.cam_lanza', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_mensaje')
             .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
             .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave')
             .where('campana.cam_clave', cam_clave).first();
@@ -134,7 +134,7 @@ exports.editar = async (req, res) => {
 
         if (updatedRows > 0) {
             const updatedRow = await db('campana')
-                .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', 'campana.cam_lanza', 'empresa.emp_nomcom', 'tipocli.tip_nom')
+                .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_mensaje')
                 .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
                 .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave')
                 .where('campana.cam_clave', cam_clave).first();
@@ -203,17 +203,23 @@ exports.selectXemp = async (req, res) => {
 
 exports.empcam = async (req, res) => {
     try {
-        const { empresa } = req.body
-        const campanaBusqueda = await db('campana')
+        const { empresa, rol } = req.body
+        let campanaBusqueda = db('campana')
             .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_mensaje', 'campana.cam_crea', 'campana.cam_estatus')
             .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
             .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave')
             .where('campana.emp_clave', empresa);
 
+        if (rol == 3) {
+            campanaBusqueda = campanaBusqueda.where('campana.cam_lanza', '>=', new Date()).andWhere('campana.cam_estatus', 1);
 
+            console.log(new Date())
+        }
+
+        const resultado = await campanaBusqueda;
 
         res.send({
-            result: campanaBusqueda
+            result: resultado
         });
 
 
