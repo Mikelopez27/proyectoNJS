@@ -7,7 +7,7 @@ exports.up = function(knex) {
     .createTable('campana', function (table) {
         table.specificType('cam_clave', 'Int(7) auto_increment primary key');
         table.integer('emp_clave', 5).references("emp_clave").inTable("empresa").onDelete("CASCADE");
-        table.integer('tip_clave', 9).references("tip_clave").inTable("tipocli");
+        table.integer('tip_clave', 9).references("tip_clave").inTable("tipocli").onDelete("CASCADE");
         table.specificType('cam_nom', 'Char (80)');
         table.text('cam_desc');
         table.date('cam_lanza');
