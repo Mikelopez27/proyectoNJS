@@ -10,7 +10,7 @@ exports.up = function(knex) {
         table.specificType('suc_nom', 'Char (80)');
         table.integer('suc_tel', 10);
         table.specificType('suc_conta', 'Char (80)');
-        table.integer('suc_cel', 10);
+        table.specificType('suc_cel', 'Char (10)');
         table.specificType('suc_calle', 'Char (50)');
         table.specificType('suc_col', 'Char (50)');
     });
