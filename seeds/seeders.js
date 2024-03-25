@@ -64,6 +64,14 @@ exports.seed = async function (knex) {
       usu_contra: 'abcdef',
       usu_estatus: true,
       usu_tipo: 2
+    },
+    {
+      emp_clave: 1,
+      usu_correo: 'usuario3@empresa1.com',
+      usu_nombre: 'Usuario 3',
+      usu_contra: '987456',
+      usu_estatus: true,
+      usu_tipo: 3
     }
   ]);
 

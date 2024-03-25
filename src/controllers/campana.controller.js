@@ -212,8 +212,6 @@ exports.empcam = async (req, res) => {
 
         if (rol == 3) {
             campanaBusqueda = campanaBusqueda.where('campana.cam_lanza', '>=', new Date()).andWhere('campana.cam_estatus', 1);
-
-            console.log(new Date())
         }
 
         const resultado = await campanaBusqueda;
