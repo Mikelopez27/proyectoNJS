@@ -8,7 +8,7 @@ exports.up = function(knex) {
         table.specificType('suc_clave', 'Int(5) auto_increment primary key');
         table.integer('emp_clave', 5).references("emp_clave").inTable("empresa").onDelete("CASCADE");
         table.specificType('suc_nom', 'Char (80)');
-        table.integer('suc_tel', 10);
+        table.specificType('suc_tel', 'Char (10)');
         table.specificType('suc_conta', 'Char (80)');
         table.specificType('suc_cel', 'Char (10)');
         table.specificType('suc_calle', 'Char (50)');
