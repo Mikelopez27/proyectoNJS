@@ -30,7 +30,9 @@ exports.seed = async function (knex) {
       emp_cel1: 1234567890,
       emp_conta2: 'Contacto 2',
       emp_cel2: 9876543210,
-      emp_status: true
+      emp_status: true,
+      emp_linkagc:"https://www.linknow.mx/LinkAgregarCliente/Oh+oKHQCRZdS2jtWVc70Cw==/41585d053a698bc3cdac7fcdafc78a042f1f0ae0268ef22e110b230dfbf447d3=ce4cd68217cb601da73638bc60447624",
+      emp_linkv:"https://www.linknow.mx/LinkVisita/4jtKjfOqQ+NWSi5xZVdxWQ==/3d4205de1b8911649238d650b7e70235086aee19ae12e9173831974c5670115d=74c6b441b8326c07e03a01a398a7b62d"
     },
     {
       emp_logo: data,
@@ -44,7 +46,9 @@ exports.seed = async function (knex) {
       emp_cel1: 1112233444,
       emp_conta2: 'Contacto 4',
       emp_cel2: 5566778899,
-      emp_status: true
+      emp_status: true,
+      emp_linkagc:"https://www.linknow.mx/LinkAgregarCliente/lTWgcEpDGlx0eNjEcvekUg/b2dd7ab5cb717a7c7849d580d51b5e95d5ad2dba7986042ed36d6de7b1c4c4a1=834c4a57780a80894a988a02786a2201",
+      emp_linkv:"https://www.linknow.mx/LinkVisita/LO4NFx-7xx1VYXUdqhlTTA/9b1ae48ba7eee7fc3df4131fbcc2220dc6605652ce08e1e86f2a085c4b94a301=eb0df440407efeddfb7222463a4955e4"
     }
   ]);
 

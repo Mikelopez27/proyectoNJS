@@ -161,7 +161,7 @@ exports.select = async (req, res) => {
 
 exports.selectXemp = async (req, res) => {
   try {
-    const {empresa} = req.body
+    const { empresa } = req.body
     const usuarioselec = await db('usuario').select('usu_numctrl', 'usu_nombre').where("emp_clave", empresa);
 
     res.send({
@@ -178,21 +178,21 @@ exports.selectXemp = async (req, res) => {
 
 exports.empusu = async (req, res) => {
   try {
-    const {empresa} = req.body
+    const { empresa } = req.body
     const usuarioBusqueda = await db('usuario')
-        .select('usuario.usu_numctrl', 'usuario.usu_correo', 'usuario.usu_nombre', 'usuario.usu_contra', 'usuario.usu_estatus', 'usuario.usu_tipo', 'empresa.emp_nomcom')
-        .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
-        .where('usuario.emp_clave', empresa);
+      .select('usuario.usu_numctrl', 'usuario.usu_correo', 'usuario.usu_nombre', 'usuario.usu_contra', 'usuario.usu_estatus', 'usuario.usu_tipo', 'empresa.emp_nomcom')
+      .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+      .where('usuario.emp_clave', empresa);
 
-        const usuarios = usuarioBusqueda.map(usuario => ({
-          usu_numctrl: usuario.usu_numctrl,
-          usu_correo: usuario.usu_correo,
-          usu_nombre: usuario.usu_nombre,
-          usu_contra: usuario.usu_contra,
-          usu_estatus: actividad[usuario.usu_estatus],
-          usu_tipo: tipoTexto[usuario.usu_tipo],
-          emp_nomcom: usuario.emp_nomcom
-        }));
+    const usuarios = usuarioBusqueda.map(usuario => ({
+      usu_numctrl: usuario.usu_numctrl,
+      usu_correo: usuario.usu_correo,
+      usu_nombre: usuario.usu_nombre,
+      usu_contra: usuario.usu_contra,
+      usu_estatus: actividad[usuario.usu_estatus],
+      usu_tipo: tipoTexto[usuario.usu_tipo],
+      emp_nomcom: usuario.emp_nomcom
+    }));
 
     res.send({
       result: usuarios
@@ -204,4 +204,28 @@ exports.empusu = async (req, res) => {
     res.status(500).json({ msg: 'Error en el servidor' });
   }
 
+};
+
+
+exports.UsuExis = async (req, res) => {
+  try {
+    const { empresa, clave } = req.body;
+
+    const UsuarioExistente = await db('usuario')
+      .select('usuario.usu_numctrl', 'usuario.usu_correo', 'usuario.usu_nombre', 'usuario.usu_contra', 'usuario.usu_estatus', 'usuario.usu_tipo', 'empresa.emp_nomcom')
+      .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
+      .where('usuario.emp_clave', empresa)
+      .andWhere('usuario.usu_contra', clave).first()
+
+    if (UsuarioExistente != null) {
+
+      res.json({ result: UsuarioExistente.usu_numctrl });
+
+    } else {
+      res.send({ result: "Usuario no existe", status: 403 });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
 };

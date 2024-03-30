@@ -18,6 +18,9 @@ const fileUpload = multer({
 
 router.get("/verEmpresa", middleware, empresa.ver)
 router.get("/selectEmpresa", middleware, empresa.select)
+router.post("/LinksEmpresa", middleware, empresa.empresaLinks)
+router.post("/LinkAgregarCliente/:enc/:key=:iv", empresa.LinkAgCli)
+router.post("/LinkVisita/:enc/:key=:iv", empresa.LinkVis)
 router.post("/traerImg", middleware, empresa.verImagen)
 router.post("/Empresa", middleware, empresa.empresaUs)
 router.post("/CVCS", middleware, empresa.DatosCVCS)

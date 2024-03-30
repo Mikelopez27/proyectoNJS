@@ -1,3 +1,5 @@
+const { parseTwoDigitYear } = require("moment");
+
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
@@ -18,6 +20,8 @@ exports.up = function (knex) {
             table.specificType('emp_cel1', 'Char (10)');
             table.specificType('emp_conta2', 'Char (50)');
             table.specificType('emp_cel2', 'Char (10)');
+            table.text('emp_linkagc')
+            table.text('emp_linkv')
             table.boolean('emp_status').defaultTo(true);
         });
 

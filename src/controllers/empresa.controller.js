@@ -2,6 +2,7 @@ const knex = require('knex');
 const config = require('../../knexfile');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto')
 
 const db = knex(config);
 
@@ -70,6 +71,41 @@ exports.agregar = async (req, res) => {
       emp_cel2,
       emp_status
     });
+
+    console.log(emp_clave)
+
+    const links = [];
+
+    for (let i = 0; i < 2; i++) {
+      const key = crypto.randomBytes(32);
+      const iv = crypto.randomBytes(16);
+
+      const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+
+      let encryptedData = cipher.update(emp_clave.toString(), 'utf-8', 'base64');
+      encryptedData += cipher.final('base64');
+      encryptedData = encryptedData.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+
+      let keyHex = key.toString('hex');
+      let ivHex = iv.toString('hex');
+
+      let link = "";
+
+      if (i === 0) {
+        link = `https://www.linknow.mx/LinkAgregarCliente/${encryptedData}/${keyHex}=${ivHex}`;
+      } else {
+        link = `https://www.linknow.mx/LinkVisita/${encryptedData}/${keyHex}=${ivHex}`;
+      }
+
+      links.push(link);
+    }
+
+    const updatedRows = await db('empresa')
+      .where('emp_clave', emp_clave)
+      .update({
+        emp_linkagc: links[0],
+        emp_linkv: links[1]
+      });
 
     if (req.file) {
       fs.unlinkSync(path.join(__dirname, '../../images/' + req.file.filename));
@@ -191,14 +227,94 @@ exports.DatosCVCS = async (req, res) => {
 
     const { empresa } = req.body;
 
-    const CountCli = await db('cliente').count('cli_clave as contador').where('emp_clave',empresa).first();
+    const CountCli = await db('cliente').count('cli_clave as contador').where('emp_clave', empresa).first();
     const CountVis = await db('visita').count('usuario.emp_clave as contador')
-    .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
-    .where('usuario.emp_clave', empresa).first();
+      .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+      .where('usuario.emp_clave', empresa).first();
     const CountCam = await db('campana').count('emp_clave as contador').where('emp_clave', empresa).first();
     const CountSuc = await db('sucursal').count('emp_clave as contador').where('emp_clave', empresa).first();
     res.send({
-      Clientes: CountCli.contador, Visitas:CountVis.contador, Campaña:CountCam.contador, Sucursal:CountSuc.contador
+      Clientes: CountCli.contador, Visitas: CountVis.contador, Campaña: CountCam.contador, Sucursal: CountSuc.contador
+    });
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
+
+};
+
+
+exports.LinkAgCli = async (req, res) => {
+  try {
+    const { enc, key, iv } = req.params;
+
+    const keyBuffer = Buffer.from(key, 'hex');
+    const ivBuffer = Buffer.from(iv, 'hex');
+
+    const decipher = crypto.createDecipheriv('aes-256-cbc', keyBuffer, ivBuffer);
+
+    let decryptedData = decipher.update(enc, 'base64', 'utf-8');
+    decryptedData += decipher.final('utf-8');
+
+    const campana = await db('campana')
+      .select('*').where('emp_clave', decryptedData).first();
+    const tipocli = await db('tipocli')
+      .select('*').where('emp_clave', decryptedData).first();
+    const usuario = await db('usuario')
+      .select('*').where('emp_clave', decryptedData).first();
+    const sucursal = await db('sucursal')
+      .select('*').where('emp_clave', decryptedData).first();
+
+    res.json({ empresa: parseInt(decryptedData), campana: campana.cam_clave, tipocli: tipocli.tip_clave, usuario: usuario.usu_numctrl, sucursal: sucursal.suc_clave });
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
+
+};
+
+exports.LinkVis = async (req, res) => {
+  try {
+    const { enc, key, iv } = req.params;
+
+    const keyBuffer = Buffer.from(key, 'hex');
+    const ivBuffer = Buffer.from(iv, 'hex');
+
+    const decipher = crypto.createDecipheriv('aes-256-cbc', keyBuffer, ivBuffer);
+
+    let decryptedData = decipher.update(enc, 'base64', 'utf-8');
+    decryptedData += decipher.final('utf-8');
+
+    const sucursal = await db('sucursal')
+      .select('*').where('emp_clave', decryptedData).first();
+    const campana = await db('campana')
+      .select('*').where('emp_clave', decryptedData).first();
+    const cliente = await db('cliente')
+      .select('*').where('emp_clave', decryptedData).first();
+
+
+    res.json({ empresa: parseInt(decryptedData), campana: campana.cam_clave, cliente: cliente.cli_clave, sucursal: sucursal.suc_clave });
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Error en el servidor' });
+  }
+
+};
+
+exports.empresaLinks = async (req, res) => {
+  try {
+
+    const { empresa } = req.body;
+
+    const LinksEmp = await db('empresa').select('emp_linkagc','emp_linkv').where('emp_clave', empresa);
+    res.send({
+      result: LinksEmp
     });
 
 

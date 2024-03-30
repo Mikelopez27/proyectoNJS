@@ -234,14 +234,11 @@ exports.ReporteUsu = async (req, res) => {
                 .whereBetween('visita.vis_fecha', [inicio, fin])
                 .groupBy('usuario.usu_nombre');
 
-
-            // todos - todos = r2
             if ((usuario == 0) && (tipo == 0)) {
                 const reporte1 = await ReportUsu2
                 const reporte2 = reporte1.reduce((total, item) => total + item.visitas, 0);
                 res.status(200).json({ result: reporte1, contador: reporte2 });
             }
-            // todos - eleccion r1
             else if (usuario == 0 && tipo > 0) {
                 ReportUsu1 = ReportUsu1.andWhere('tipocli.tip_clave', tipo)
                 const reporte1 = await ReportUsu1;
@@ -249,7 +246,6 @@ exports.ReporteUsu = async (req, res) => {
 
                 res.status(200).json({ result: reporte1, contador: reporte2 });
             }
-            // eleccion - todos r2
             else if (usuario > 0 && tipo == 0) {
                 ReportUsu2 = ReportUsu2.andWhere('visita.usu_numctrl', usuario);
                 const reporte1 = await ReportUsu2;
@@ -257,7 +253,6 @@ exports.ReporteUsu = async (req, res) => {
 
                 res.status(200).json({ result: reporte1, contador: reporte2 });
             }
-            // eleccion - eleccion r1
             else if (usuario > 0 && tipo > 0) {
 
                 ReportUsu1 = ReportUsu1.andWhere('visita.usu_numctrl', usuario).andWhere('tipocli.tip_clave', tipo);
@@ -285,11 +280,9 @@ exports.ReporteUsu = async (req, res) => {
                         .groupBy('visita.cli_clave', 'usuario.emp_clave')
                         .havingRaw('COUNT(visita.cli_clave) = 1');
 
-                    // todos - eleccion r1
                     if (usuario == 0 && tipo > 0) {
                         subquery.andWhere('tipocli.tip_clave', tipo);
                     }
-                    //  eleccion - eleccion r1
                     else if (usuario > 0 && tipo > 0) {
 
                         subquery.andWhere('visita.usu_numctrl', usuario).andWhere('tipocli.tip_clave', tipo);
@@ -316,7 +309,6 @@ exports.ReporteUsu = async (req, res) => {
                         .groupBy('visita.cli_clave', 'usuario.usu_numctrl')
                         .havingRaw('COUNT(visita.cli_clave) = 1');
 
-                    // eleccion - todos r2
                     if (usuario > 0 && tipo == 0) {
                         subquery.andWhere('visita.usu_numctrl', usuario)
                     }
@@ -381,7 +373,6 @@ exports.GrafVis = async (req, res) => {
     try {
         const { empresa, select, inicio, fin } = req.body;
 
-        // Crear un array de todos los días entre inicio y fin
         const dias = [];
         let fechaActual = moment(inicio, 'YYYY-MM-DD');
         const fechaFin = moment(fin, 'YYYY-MM-DD');
@@ -479,5 +470,33 @@ exports.GrafVis = async (req, res) => {
     catch (error) {
         console.error(error);
         res.status(500).json({ msg: 'Error en el servidor' });
+    }
+};
+
+exports.agregarLinkV = async (req, res) => {
+    try {
+        const { usu_numctrl, suc_clave, cli_clave, vis_cam } = req.body;
+
+        const [visfecha] = await db('visita').insert({
+            usu_numctrl,
+            suc_clave,
+            cli_clave,
+            vis_cam
+        });
+
+        const insertedRow = await db('visita')
+            .select('visita.vis_fecha', 'usuario.usu_nombre', 'sucursal.suc_nom', 'cliente.cli_nomcom', 'campana.cam_nom')
+            .join('usuario', 'visita.usu_numctrl', '=', 'usuario.usu_numctrl')
+            .join('sucursal', 'visita.suc_clave', '=', 'sucursal.suc_clave')
+            .join('cliente', 'visita.cli_clave', '=', 'cliente.cli_clave')
+            .join('campana', 'visita.vis_cam', '=', 'campana.cam_clave')
+            .where('visita.vis_fecha', db.fn.now()).first();
+
+        res.send({
+            status: 200, msg:'Visita completada!' 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error de servidor' });
     }
 };

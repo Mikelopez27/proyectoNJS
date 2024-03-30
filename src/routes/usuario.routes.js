@@ -8,6 +8,7 @@ router.get("/verUsuario", middleware, usuario.ver)
 router.get("/selectUsuario", middleware, usuario.select)
 router.post("/selectXempusu", middleware, usuario.selectXemp)
 router.post("/EmpUsu", middleware, usuario.empusu)
+router.post("/UsuExistente", usuario.UsuExis)
 router.post("/agregarUsuario", middleware, usuario.agregar)
 router.put("/editarUsuario/:usu_numctrl", middleware, usuario.editar)
 router.delete("/eliminarUsuario/:usu_numctrl", middleware, usuario.eliminar);

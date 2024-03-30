@@ -211,3 +211,38 @@ exports.conttipocli = async (req, res) => {
     }
 
 };
+
+exports.agregarLinkC = async (req, res) => {
+    try {
+        const { emp_clave, tip_clave, cli_nomcom, cli_cel, cli_correo, cam_clave, usu_numctrl, suc_clave } = req.body;
+
+
+        const [cli_clave] = await db('cliente').insert({
+            emp_clave,
+            tip_clave,
+            cli_nomcom,
+            cli_cel,
+            cli_correo
+        });
+
+        const [cxc_fecha] = await db('clixcam').insert({
+            emp_clave,
+            cam_clave,
+            cli_clave
+        });
+
+
+        const [visfecha] = await db('visita').insert({
+            usu_numctrl,
+            suc_clave,
+            cli_clave,
+            vis_cam: cam_clave
+        });
+
+        res.status(200).json({ msg: 'Inserciones realizadas' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+    };
