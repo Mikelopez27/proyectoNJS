@@ -267,6 +267,7 @@ exports.LinkAgCli = async (req, res) => {
     const sucursal = await db('sucursal')
       .select('*').where('emp_clave', decryptedData).first();
 
+
     res.json({ empresa: parseInt(decryptedData), campana: campana.cam_clave, tipocli: tipocli.tip_clave, usuario: usuario.usu_numctrl, sucursal: sucursal.suc_clave });
 
 
@@ -312,7 +313,7 @@ exports.empresaLinks = async (req, res) => {
 
     const { empresa } = req.body;
 
-    const LinksEmp = await db('empresa').select('emp_linkagc','emp_linkv').where('emp_clave', empresa);
+    const LinksEmp = await db('empresa').select('emp_linkagc','emp_linkv').where('emp_clave', empresa).first();
     res.send({
       result: LinksEmp
     });
@@ -324,3 +325,6 @@ exports.empresaLinks = async (req, res) => {
   }
 
 };
+
+
+
