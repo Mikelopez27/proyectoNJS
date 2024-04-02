@@ -31,8 +31,7 @@ exports.seed = async function (knex) {
       emp_conta2: 'Contacto 2',
       emp_cel2: 9876543210,
       emp_status: true,
-      emp_linkagc:"https://www.linknow.mx/LinkAgregarCliente/96VJKDun2IjTG0AGtcmOaw=b141d1237efb2062bffab9f1eda3131a347df611c66fddb1ad1ba5e5ac6fab45=b8bdfa9981521e2778d86a7b0c020815",
-      emp_linkv:"https://www.linknow.mx/LinkVisita/DULupwVp3zMVugVW4Xvnzg=e3e7ecf26110cec021507f5cf1e6b076bc761010c5f8ecda418e85f52b026253=8dbce2510f6b7cf8392bb294fe9aee7f"
+      emp_linkagc:"https://www.linknow.mx/LinkAgregarCliente/96VJKDun2IjTG0AGtcmOaw=b141d1237efb2062bffab9f1eda3131a347df611c66fddb1ad1ba5e5ac6fab45=b8bdfa9981521e2778d86a7b0c020815"
     },
     {
       emp_logo: data,
@@ -47,8 +46,7 @@ exports.seed = async function (knex) {
       emp_conta2: 'Contacto 4',
       emp_cel2: 5566778899,
       emp_status: true,
-      emp_linkagc:"https://www.linknow.mx/LinkAgregarCliente/U36Lch7xx_zzBu14JWM_2g=e6addebff0f13f444979dd3455c8ab17463f4d47b70c1dad8459dad25ba1948b=7908e085cfff0e1024d4f9b38a254f4f",
-      emp_linkv:"https://www.linknow.mx/LinkVisita/w1-Ddk_KYQua5TYITKxq-w=e4762584bc86de6af1f77ef9ead02c247878bd5e1254ebc7d8c9b0bd8077bad8=7c4b249cfed01d47a9b306e88003bae3"
+      emp_linkagc:"https://www.linknow.mx/LinkAgregarCliente/U36Lch7xx_zzBu14JWM_2g=e6addebff0f13f444979dd3455c8ab17463f4d47b70c1dad8459dad25ba1948b=7908e085cfff0e1024d4f9b38a254f4f"
     }
   ]);
 
@@ -123,21 +121,23 @@ exports.seed = async function (knex) {
 
   await knex('campana').insert([
     {
-      EMP_CLAVE: 1,
-      TIP_CLAVE: 1,
-      CAM_NOM: "Campaña 1",
-      CAM_DESC: "Descripción de la Campaña 1",
-      CAM_LANZA: "2024-01-20",
-      cam_imagen: data
+      emp_clave: 1,
+      tip_clave: 1,
+      cam_nom: "Campaña 1",
+      cam_desc: "Descripción de la Campaña 1",
+      cam_lanza: "2024-01-20",
+      cam_imagen: data,
+      cam_linkv:"https://www.linknow.mx/LinkVisita/DULupwVp3zMVugVW4Xvnzg=e3e7ecf26110cec021507f5cf1e6b076bc761010c5f8ecda418e85f52b026253=8dbce2510f6b7cf8392bb294fe9aee7f"
     }
     ,
     {
-      EMP_CLAVE: 2,
-      TIP_CLAVE: 2,
-      CAM_NOM: "Campaña 2",
-      CAM_DESC: "Descripción de la Campaña 2",
-      CAM_LANZA: "2024-01-23",
-      cam_imagen: data
+      emp_clave: 2,
+      tip_clave: 2,
+      cam_nom: "Campaña 2",
+      cam_desc: "Descripción de la Campaña 2",
+      cam_lanza: "2024-01-23",
+      cam_imagen: data,
+      cam_linkv:"https://www.linknow.mx/LinkVisita/w1-Ddk_KYQua5TYITKxq-w=e4762584bc86de6af1f77ef9ead02c247878bd5e1254ebc7d8c9b0bd8077bad8=7c4b249cfed01d47a9b306e88003bae3"
     }
 
   ]);

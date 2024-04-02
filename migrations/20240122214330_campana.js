@@ -14,6 +14,7 @@ exports.up = function(knex) {
         table.text('cam_mensaje');
         table.specificType('cam_imagen','LONGBLOB');
         table.date('cam_crea').defaultTo(knex.fn.now());
+        table.text('cam_linkv')
         table.boolean('cam_estatus');
     });
 };

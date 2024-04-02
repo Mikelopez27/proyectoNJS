@@ -2,6 +2,7 @@ const knex = require('knex');
 const config = require('../../knexfile');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto')
 
 const db = knex(config);
 
@@ -250,6 +251,39 @@ exports.anacamp = async (req, res) => {
         const Consulta = await AnalisisCamp;
 
         res.status(200).json({ result: Consulta });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+
+};
+
+exports.LinkVis = async (req, res) => {
+    try {
+        const { enc, key, iv } = req.params;
+
+        const keyBuffer = Buffer.from(key, 'hex');
+        const ivBuffer = Buffer.from(iv, 'hex');
+
+        const decipher = crypto.createDecipheriv('aes-256-cbc', keyBuffer, ivBuffer);
+
+        let decryptedData = decipher.update(enc, 'base64', 'utf-8');
+        decryptedData += decipher.final('utf-8');
+
+        const campana = await db('campana')
+            .select('cam_clave', 'emp_clave', 'cam_nom', 'cam_desc', 'tip_clave').where('cam_clave', decryptedData).first();
+
+
+        const cliente = await db('cliente')
+            .select('*').where('emp_clave', campana.emp_clave).first();
+
+        const sucursal = await db('sucursal')
+            .select('*').where('emp_clave', campana.emp_clave).first();
+
+
+        res.json({campana:campana,cliente: cliente.cli_clave, sucursal: sucursal.suc_clave });
+
 
     } catch (error) {
         console.error(error);

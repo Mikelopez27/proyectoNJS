@@ -209,20 +209,20 @@ exports.empusu = async (req, res) => {
 
 exports.UsuExis = async (req, res) => {
   try {
-    const { empresa, clave } = req.body;
+    const { correo, contrasena } = req.body;
 
     const UsuarioExistente = await db('usuario')
-      .select('usuario.usu_numctrl', 'usuario.usu_correo', 'usuario.usu_nombre', 'usuario.usu_contra', 'usuario.usu_estatus', 'usuario.usu_tipo', 'empresa.emp_nomcom')
-      .join('empresa', 'usuario.emp_clave', '=', 'empresa.emp_clave')
-      .where('usuario.emp_clave', empresa)
-      .andWhere('usuario.usu_contra', clave).first()
+      .where('usu_correo', correo)
+      .where('usu_contra', contrasena)
+      .first();
 
-    if (UsuarioExistente != null) {
+
+    if (UsuarioExistente) {
 
       res.json({ result: UsuarioExistente.usu_numctrl });
 
     } else {
-      res.send({ result: "Usuario no existe", status: 403 });
+      res.json({ result: "Usuario no existe", status: 403 });
     }
   } catch (error) {
     console.error(error);
