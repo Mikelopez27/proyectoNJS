@@ -84,7 +84,7 @@ exports.agregar = async (req, res) => {
     let keyHex = key.toString('hex');
     let ivHex = iv.toString('hex');
 
-    const link = `https://www.linknow.mx/LinkAgregarCliente/${encryptedData}/${keyHex}=${ivHex}`;
+    const link = `https://www.linknow.mx/LinkAgregarCliente/${encryptedData}=${keyHex}=${ivHex}`;
 
 
     const updatedRows = await db('empresa')

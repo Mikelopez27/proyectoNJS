@@ -67,12 +67,33 @@ exports.agregar = async (req, res) => {
 
         });
 
+        const key = crypto.randomBytes(32);
+        const iv = crypto.randomBytes(16);
+    
+        const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    
+        let encryptedData = cipher.update(cam_clave.toString(), 'utf-8', 'base64');
+        encryptedData += cipher.final('base64');
+        encryptedData = encryptedData.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    
+        let keyHex = key.toString('hex');
+        let ivHex = iv.toString('hex');
+    
+        const link = `https://www.linknow.mx/LinkVisita/${encryptedData}=${keyHex}=${ivHex}`;
+    
+    
+        const updatedRows = await db('campana')
+          .where('cam_clave', cam_clave)
+          .update({
+            cam_linkv: link
+          });
+
         if (req.file) {
             fs.unlinkSync(path.join(__dirname, '../../images/' + req.file.filename));
         }
 
         const insertedRow = await db('campana')
-            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_mensaje')
+            .select('campana.cam_clave', 'campana.cam_nom', 'campana.cam_desc', db.raw('DATE_FORMAT(campana.cam_lanza, "%Y-%m-%d") as cam_lanza'), 'empresa.emp_nomcom', 'tipocli.tip_nom', 'campana.cam_mensaje','cam_linkv')
             .join('empresa', 'campana.emp_clave', '=', 'empresa.emp_clave')
             .join('tipocli', 'campana.tip_clave', '=', 'tipocli.tip_clave')
             .where('campana.cam_clave', cam_clave).first();
