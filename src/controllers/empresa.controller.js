@@ -269,7 +269,9 @@ exports.empresaLinks = async (req, res) => {
 
     const { empresa } = req.body;
 
-    const LinksEmp = await db('empresa').select('emp_linkagc', 'emp_linkv').where('emp_clave', empresa).first();
+    const LinksEmp = await db('empresa').select('emp_linkagc').where('emp_clave', empresa).first();
+
+    const LinkCampana = await db('campana').select('cam_nom','cam_linkv').where('emp_clave', empresa).first();
     res.send({
       result: LinksEmp
     });
