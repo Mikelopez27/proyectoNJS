@@ -273,7 +273,7 @@ exports.empresaLinks = async (req, res) => {
 
     const LinkCampana = await db('campana').select('cam_nom','cam_linkv').where('emp_clave', empresa).first();
     res.send({
-      result: LinksEmp
+      empresa: LinksEmp, campanas:LinkCampana
     });
 
 
